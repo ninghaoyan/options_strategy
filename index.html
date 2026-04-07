@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPY Options Income Strategy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #1a1f2e, #252d3d); padding: 24px 20px; border-bottom: 1px solid #2d3748; }
+  header h1 { font-size: 1.4rem; font-weight: 700; color: #63b3ed; }
+  header p { font-size: 0.8rem; color: #718096; margin-top: 4px; }
+  .tabs { display: flex; overflow-x: auto; background: #1a1f2e; border-bottom: 1px solid #2d3748; padding: 0 12px; gap: 4px; }
+  .tab { padding: 12px 14px; font-size: 0.75rem; font-weight: 600; color: #718096; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; }
+  .tab.active { color: #63b3ed; border-bottom-color: #63b3ed; }
+  .tab:hover:not(.active) { color: #a0aec0; }
+  .content { display: none; padding: 16px; max-width: 800px; margin: 0 auto; }
+  .content.active { display: block; }
+  .card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+  .card h2 { font-size: 0.95rem; font-weight: 700; color: #63b3ed; margin-bottom: 12px; }
+  .card h3 { font-size: 0.82rem; font-weight: 600; color: #a0aec0; margin: 12px 0 8px; }
+  .card p, .card li { font-size: 0.8rem; color: #cbd5e0; line-height: 1.6; }
+  .card ul { padding-left: 16px; }
+  .card li { margin-bottom: 4px; }
+  .highlight { background: #252d3d; border-left: 3px solid #63b3ed; border-radius: 6px; padding: 12px; margin: 10px 0; font-size: 0.78rem; color: #e2e8f0; font-family: monospace; line-height: 1.8; white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.77rem; }
+  th { background: #252d3d; color: #63b3ed; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { padding: 8px 10px; border-bottom: 1px solid #2d3748; color: #cbd5e0; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #252d3d; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+  .badge-green { background: #1a3a2a; color: #68d391; }
+  .badge-yellow { background: #3a2f1a; color: #f6ad55; }
+  .badge-red { background: #3a1a1a; color: #fc8181; }
+  .badge-blue { background: #1a2a3a; color: #63b3ed; }
+  .decision-node { background: #252d3d; border-radius: 8px; padding: 12px; margin: 8px 0; border-left: 3px solid #4a5568; }
+  .decision-node.green { border-left-color: #68d391; }
+  .decision-node.yellow { border-left-color: #f6ad55; }
+  .decision-node.red { border-left-color: #fc8181; }
+  .decision-node .label { font-size: 0.72rem; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .decision-node .action { font-size: 0.8rem; color: #e2e8f0; line-height: 1.6; }
+  .rule-box { display: flex; align-items: flex-start; gap: 10px; background: #252d3d; border-radius: 8px; padding: 12px; margin: 8px 0; }
+  .rule-num { background: #63b3ed; color: #0f1117; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+  .rule-text { font-size: 0.8rem; color: #cbd5e0; line-height: 1.5; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 500px) { .two-col { grid-template-columns: 1fr; } }
+  .compare-card { background: #252d3d; border-radius: 8px; padding: 12px; }
+  .compare-card h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 8px; }
+  .compare-card.csp h4 { color: #68d391; }
+  .compare-card.bps h4 { color: #f6ad55; }
+  .compare-card p { font-size: 0.77rem; color: #a0aec0; line-height: 1.6; }
+  .quote { background: #1e2a1e; border: 1px solid #2d4a2d; border-radius: 8px; padding: 14px; margin: 10px 0; }
+  .quote p { font-size: 0.82rem; color: #68d391; font-style: italic; line-height: 1.6; }
+  .vix-bar { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+  .vix-label { font-size: 0.75rem; color: #a0aec0; width: 140px; flex-shrink: 0; }
+  .vix-track { flex: 1; height: 8px; background: #2d3748; border-radius: 4px; overflow: hidden; }
+  .vix-fill { height: 100%; border-radius: 4px; }
+  .vix-value { font-size: 0.75rem; color: #e2e8f0; width: 60px; text-align: right; }
+  .disclaimer { background: #2d2000; border: 1px solid #744210; border-radius: 8px; padding: 12px; margin-top: 16px; }
+  .disclaimer p { font-size: 0.75rem; color: #f6ad55; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📊 SPY Options Income Strategy</h1>
+  <p>Cash-Secured Puts + Bull Put Spreads · SPY ~$655 · VIX ~24</p>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('overview', this)">Overview</div>
+  <div class="tab" onclick="showTab('strike', this)">Strike Selection</div>
+  <div class="tab" onclick="showTab('bps', this)">Bull Put Spread</div>
+  <div class="tab" onclick="showTab('actions', this)">Actions</div>
+  <div class="tab" onclick="showTab('rolling', this)">Rolling Rules</div>
+  <div class="tab" onclick="showTab('risk', this)">Risk Rules</div>
+  <div class="tab" onclick="showTab('examples', this)">Examples</div>
+</div>
+
+<!-- OVERVIEW -->
+<div id="overview" class="content active">
+  <div class="card">
+    <h2>🔄 The Two Strategies</h2>
+    <div class="two-col">
+      <div class="compare-card csp">
+        <h4>Cash-Secured Put (CSP)</h4>
+        <p>Sell a put, hold full cash to buy 100 SPY shares if assigned. More premium, more capital tied up, downside to $0.</p>
+      </div>
+      <div class="compare-card bps">
+        <h4>Bull Put Spread (BPS)</h4>
+        <p>Sell a put + buy a lower put. Less premium but defined max loss. Less capital required. Better in uncertain markets.</p>
+      </div>
+    </div>
+    <div class="highlight">SPY stays above strike  → keep full premium ✅
+SPY falls below (CSP)   → assigned, own SPY shares → start Wheel
+SPY falls below (BPS)   → max loss = spread width - premium collected</div>
+  </div>
+
+  <div class="card">
+    <h2>📅 The Master Decision Flow</h2>
+    <div class="highlight">Open position (30–45 DTE)
+         ↓
+Set GTC limit buy at 50% of premium immediately
+         ↓
+Monitor daily inside 21 DTE
+         ↓
+    ├── 50% profit hit (any time)?     → Close immediately, redeploy
+    │
+    ├── 21 DTE reached, in profit?     → Close anyway (gamma risk)
+    │
+    ├── 21 DTE reached, at a LOSS?     → Must still act — do NOT wait
+    │        │
+    │        ├── Loss &lt; 1× premium     → Roll down and out (lower strike, further expiry)
+    │        ├── Loss = 2× premium     → Close immediately — stop loss triggered
+    │        └── Loss &gt; 2× premium     → Close or accept assignment
+    │
+    ├── Strike approaching (any DTE)?  → Roll / accept assignment / cut loss
+    │
+    └── Put worth &lt;$0.10?             → Let expire (commission &gt; remaining risk)
+
+⚠️  Waiting past 21 DTE for a bounce is NOT an option.
+    Inside 21 DTE, gamma dominates — a 1% SPY drop
+    can move your put 4–5× more than it would outside 21 DTE.</div>
+  </div>
+
+  <div class="card">
+    <h2>📍 CSP vs BPS — When to Use Which</h2>
+    <table>
+      <tr><th>Situation</th><th>CSP</th><th>BPS</th></tr>
+      <tr><td>High conviction SPY won't fall</td><td>✅</td><td></td></tr>
+      <tr><td>Uncertain market (like now)</td><td></td><td>✅</td></tr>
+      <tr><td>Deploy large capital</td><td>✅</td><td></td></tr>
+      <tr><td>Run multiple smaller positions</td><td></td><td>✅</td></tr>
+      <tr><td>VIX above 25</td><td></td><td>✅ defined risk</td></tr>
+      <tr><td>Want to own SPY if assigned</td><td>✅</td><td></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>💰 Monthly Income Estimate (Your Accounts)</h2>
+    <table>
+      <tr><th>Strategy</th><th>Capital</th><th>Contracts</th><th>Est. Monthly</th></tr>
+      <tr><td>CSP $600 strike (IBKR)</td><td>USD 60,000</td><td>1</td><td>USD 400–600</td></tr>
+      <tr><td>BPS $600/$585 (Moomoo)</td><td>USD 15,000</td><td>10 spreads</td><td>USD 250–350</td></tr>
+      <tr><td><strong>Combined</strong></td><td><strong>~USD 75,000</strong></td><td></td><td><strong>USD 650–950</strong></td></tr>
+    </table>
+    <p style="margin-top:10px; color:#718096; font-size:0.75rem;">≈ SGD 850–1,250/month · ~10–15% annualised on deployed capital</p>
+  </div>
+</div>
+
+<!-- STRIKE SELECTION -->
+<div id="strike" class="content">
+  <div class="card">
+    <h2>🎯 Step 1 — Choose Your Delta (Primary Selector)</h2>
+    <table>
+      <tr><th>Delta</th><th>Strike (~SPY $655)</th><th>Prob. Profit</th><th>Risk Level</th></tr>
+      <tr><td>0.30</td><td>~$625</td><td>~70%</td><td><span class="badge badge-red">Aggressive</span></td></tr>
+      <tr><td>0.20–0.25</td><td>~$610</td><td>~80%</td><td><span class="badge badge-blue">Balanced ✅</span></td></tr>
+      <tr><td>0.15</td><td>~$600</td><td>~85%</td><td><span class="badge badge-yellow">Conservative</span></td></tr>
+      <tr><td>0.10</td><td>~$585</td><td>~90%</td><td><span class="badge badge-green">Very Safe</span></td></tr>
+    </table>
+    <div class="highlight" style="margin-top:12px;">Target: Delta 0.15–0.25
+Open options chain → find the strike where delta = your target
+That's your strike. Done.</div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Step 2 — VIX as Sanity Check (Same Delta, Different Strike)</h2>
+    <p style="margin-bottom:12px; font-size:0.8rem; color:#a0aec0;">VIX doesn't change your delta target — it shifts HOW FAR the strike lands from current price.</p>
+    <div class="vix-bar">
+      <div class="vix-label">Calm (VIX ~15)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:30%; background:#68d391;"></div></div>
+      <div class="vix-value">~5% OTM</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">Now (VIX ~24) ◀</div>
+      <div class="vix-track"><div class="vix-fill" style="width:60%; background:#f6ad55;"></div></div>
+      <div class="vix-value">~8% OTM</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">Fearful (VIX ~35)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:90%; background:#fc8181;"></div></div>
+      <div class="vix-value">~12% OTM</div>
+    </div>
+    <div class="highlight" style="margin-top:12px;">Current (VIX ~24, SPY ~$655) sanity check:
+8%  OTM → $655 × 0.92 = $602  ← lower bound
+12% OTM → $655 × 0.88 = $576  ← upper bound
+
+If your delta 0.20 strike lands inside $576–$602 ✅ you're good
+If it's above $620 — you're too close in current conditions ⚠️</div>
+    <div class="quote">
+      <p>"Delta is your primary selector. OTM% is just the sanity check. VIX is the reason they're connected."</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📅 Step 3 — Choose Expiry (DTE)</h2>
+    <table>
+      <tr><th>DTE at Entry</th><th>Profile</th><th>Theta Decay</th></tr>
+      <tr><td>7–14 days</td><td>Active traders only</td><td>Fast but erratic gamma — avoid</td></tr>
+      <tr><td>21–29 days</td><td>Too short — leaves little time before 21 DTE trigger</td><td>Fast but limited runway</td></tr>
+      <tr><td><strong>30–45 days</strong></td><td><strong>Sweet spot ✅ — sell here</strong></td><td><strong>Steepest predictable theta decay</strong></td></tr>
+      <tr><td>45–60 days</td><td>More buffer, higher premium — acceptable</td><td>Moderate, slower early decay</td></tr>
+    </table>
+    <div class="highlight" style="margin-top:10px;">Rule: SELL at 30–45 DTE
+      → 50% profit hit?        Close immediately, redeploy
+      → 21 DTE remaining?      Close or roll — regardless of profit/loss
+      → Never sell below 30 DTE (not enough runway before the 21 DTE hard stop)</div>
+
+    <div class="decision-node" style="border-left-color:#f6ad55; margin-top:10px;">
+      <div class="label" style="color:#f6ad55;">⚠️ Why Not Sell at 21–29 DTE?</div>
+      <div class="action">If you sell at 25 DTE, your hard close rule triggers in just 4 days. That's almost no time for theta to work before gamma takes over. You need the full 30–45 DTE runway to give the position room to breathe and let the 50% profit rule play out naturally.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⚠️ Step 4 — Current Market Adjustments</h2>
+    <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>Delta first:</strong> Open chain, find strike at delta 0.20</div></div>
+    <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>OTM% check:</strong> Confirm it's 8–12% below SPY price right now</div></div>
+    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>Avoid macro events:</strong> No selling the week before Fed, CPI, or major earnings</div></div>
+    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>VIX mid-trade spike:</strong> Your delta jumps even if SPY hasn't moved — act on Part 4 earlier than usual</div></div>
+  </div>
+</div>
+
+<!-- BPS SETUP -->
+<div id="bps" class="content">
+
+  <div class="card">
+    <h2>🏗️ How the Bull Put Spread Is Constructed</h2>
+    <p style="font-size:0.8rem; color:#a0aec0; margin-bottom:12px;">Two legs. The short put earns income. The long put caps your downside.</p>
+    <div class="highlight">SELL higher put  ← income leg  (chosen via delta, same as CSP)
+BUY  lower put   ← protection leg (what this tab covers)
+
+Spread width  = short strike - long strike
+Max profit    = net premium collected
+Max loss      = (spread width × 100) - net premium
+Capital req.  = spread width × 100</div>
+  </div>
+
+  <div class="card">
+    <h2>📐 Factor 1 — Spread Width vs Risk/Reward</h2>
+    <p style="font-size:0.8rem; color:#a0aec0; margin-bottom:10px;">Example: Short put at $600, SPY at $655, VIX ~24</p>
+    <table>
+      <tr><th>Spread</th><th>Long Put</th><th>Capital</th><th>Est. Premium</th><th>Max Loss</th><th>ROC</th></tr>
+      <tr><td>$5 wide</td><td>$595</td><td>$500</td><td>~$100</td><td>~$400</td><td>~25%</td></tr>
+      <tr><td>$10 wide</td><td>$590</td><td>$1,000</td><td>~$180</td><td>~$820</td><td>~22%</td></tr>
+      <tr><td><strong>$15 wide ✅</strong></td><td><strong>$585</strong></td><td><strong>$1,500</strong></td><td><strong>~$300</strong></td><td><strong>~$1,200</strong></td><td><strong>~25%</strong></td></tr>
+      <tr><td>$25 wide</td><td>$575</td><td>$2,500</td><td>~$450</td><td>~$2,050</td><td>~22%</td></tr>
+    </table>
+    <div class="quote" style="margin-top:12px;">
+      <p>"ROC tends to be similar across widths. The real choice is how many contracts you want to run and what your max loss per spread feels comfortable."</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Factor 2 — Return on Capital (ROC)</h2>
+    <p style="font-size:0.8rem; color:#a0aec0; margin-bottom:10px;">Don't just look at raw premium — measure what you earn relative to what you risk.</p>
+    <div class="highlight">ROC = Net Premium ÷ Max Loss
+
+$600/$595 spread:  $100 ÷ $400  = 25% ROC
+$600/$590 spread:  $180 ÷ $820  = 22% ROC
+$600/$585 spread:  $300 ÷ $1,200 = 25% ROC  ← sweet spot
+$600/$575 spread:  $450 ÷ $2,050 = 22% ROC
+
+Target: ROC of 20–25% per cycle at 30–45 DTE</div>
+  </div>
+
+  <div class="card">
+    <h2>📍 Factor 3 — Where to Place the Long Put</h2>
+    <div class="two-col">
+      <div class="compare-card csp">
+        <h4>Approach A — Fixed Width (Simpler)</h4>
+        <p>Pick a standard spread width ($10–$15) and stick to it every trade. Keeps position sizing consistent and easy to manage. Best for beginners.</p>
+      </div>
+      <div class="compare-card bps">
+        <h4>Approach B — Key Support Level</h4>
+        <p>Look at SPY's chart and place the long put just below a major support level. Makes the spread structurally meaningful — protection kicks in exactly where the market breaks down.</p>
+      </div>
+    </div>
+    <div class="highlight" style="margin-top:12px;">Example (Approach B):
+SPY at $655, short put at $600
+Chart shows strong SPY support at $580–585
+→ Buy $580 put as protection
+
+Logic: If SPY breaks $580, something has gone
+seriously wrong — that's exactly when you want
+your protection leg to kick in.</div>
+  </div>
+
+  <div class="card">
+    <h2>🧮 Practical Decision Framework</h2>
+    <div class="highlight">Step 1: Choose short put via delta
+         e.g., $600 put at delta 0.20
+
+Step 2: Decide max loss budget per spread
+         e.g., "comfortable losing max $1,000/spread"
+
+Step 3: Work backwards to find spread width
+         Max loss  = (width × 100) - premium
+         $1,000    = (width × 100) - $300
+         width × 100 = $1,300
+         width     = $13 → round to $585 or $590 strike
+
+Step 4: Check ROC
+         $300 ÷ $1,200 = 25% → acceptable ✅
+
+Step 5: Sanity check on chart
+         Is $585 near a support level? Even better ✅</div>
+  </div>
+
+  <div class="card">
+    <h2>💰 Your Setup — 10 Spreads on Moomoo</h2>
+    <div class="highlight">10 × SPY $600/$585 Bull Put Spreads (15 wide)
+
+Premium per spread:      ~$300
+Total premium collected:  $3,000
+Max loss per spread:      $1,200
+Total max loss:           $12,000
+Capital required:         $15,000
+ROC if max profit:        ~25%
+
+vs running 1 CSP at $600:
+Premium:   ~$500
+Capital:   $60,000
+Max loss:  unlimited downside to $0
+
+BPS gives you 6× more positions for 25% of the capital
+with a fully defined worst-case loss ✅</div>
+
+    <div class="rule-box" style="margin-top:12px;">
+      <div class="rule-num">!</div>
+      <div class="rule-text"><strong>Never go narrower than $5 wide</strong> — premium collected is too small to justify the trade after commissions. Never go so wide that the max loss becomes uncomfortable to absorb in a single trade.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ACTIONS -->
+<div id="actions" class="content">
+  <div class="card">
+    <h2>🚦 Strike Approaching — Decision Tree</h2>
+    <p style="margin-bottom:12px; font-size:0.8rem; color:#718096;">Example: You sold $600 put. SPY is at various levels below.</p>
+
+    <div class="decision-node green">
+      <div class="label">📍 SPY more than 5% above strike (SPY &gt; $630)</div>
+      <div class="action">→ Do nothing. Theta is working for you.<br>→ Check weekly, not daily.</div>
+    </div>
+    <div class="decision-node yellow">
+      <div class="label">⚠️ SPY 2–5% above strike (SPY $612–630)</div>
+      <div class="action">→ Monitor daily.<br>→ Decide in advance: will you roll or accept assignment?<br>→ Check upcoming macro events this week.</div>
+    </div>
+    <div class="decision-node red">
+      <div class="label">🚨 SPY within 1–2% of strike (SPY $600–612) → ACT NOW</div>
+      <div class="action">Choose one of three options ↓</div>
+    </div>
+
+    <div style="padding-left: 14px; margin-top: 8px;">
+      <div class="decision-node" style="border-left-color:#63b3ed;">
+        <div class="label" style="color:#63b3ed;">Option 1 — Roll Down and Out</div>
+        <div class="action">Buy back short put → Sell new put at lower strike, later expiry<br>Goal: collect net credit (or minimal debit)<br>Example: Roll $600 May → $580 June<br>✅ Best when: Bearish short-term, bullish long-term</div>
+      </div>
+      <div class="decision-node" style="border-left-color:#68d391;">
+        <div class="label" style="color:#68d391;">Option 2 — Accept Assignment</div>
+        <div class="action">Let it expire ITM → Buy 100 SPY at $600<br>Effective cost = $600 - premium = ~$594<br>Immediately sell covered call → Wheel begins<br>✅ Best when: You WANT to own SPY at this level</div>
+      </div>
+      <div class="decision-node" style="border-left-color:#fc8181;">
+        <div class="label" style="color:#fc8181;">Option 3 — Close for a Loss</div>
+        <div class="action">Buy back put at a loss — exit clean<br>Rule: Close if loss = 2× premium collected<br>Example: Collected $600 → close if loss hits $1,200<br>✅ Best when: You believe SPY will keep falling hard</div>
+      </div>
+    </div>
+
+    <div class="decision-node red" style="margin-top:8px;">
+      <div class="label">❌ Assigned at expiry (SPY below $600)</div>
+      <div class="action">→ You own 100 SPY at $600. Cost basis = $600 - premium ≈ $594<br>→ IMMEDIATELY sell covered call 2–5% above current SPY price<br>→ The Wheel has started</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💡 Profit-Taking Rules</h2>
+    <table>
+      <tr><th>Situation</th><th>Action</th></tr>
+      <tr><td>SPY rallies fast, 50% profit hit early</td><td><span class="badge badge-green">Close immediately, redeploy</span></td></tr>
+      <tr><td>SPY flat, 50% profit hit at any DTE</td><td><span class="badge badge-green">Close and redeploy</span></td></tr>
+      <tr><td>21 DTE reached, less than 50% profit</td><td><span class="badge badge-yellow">Close anyway — gamma kicks in</span></td></tr>
+      <tr><td>Inside 14 DTE, 70%+ profit</td><td><span class="badge badge-yellow">Close — last 30% not worth the risk</span></td></tr>
+      <tr><td>Put worth less than $0.10</td><td><span class="badge badge-blue">Let expire — commission &gt; remaining risk</span></td></tr>
+    </table>
+
+    <h3 style="margin-top:14px;">Flat Market vs Rally — Common Misconception</h3>
+    <table>
+      <tr><th>Market</th><th>How Fast 50% Hit</th><th>Rule Still Applies?</th></tr>
+      <tr><td>Strong rally</td><td>Days</td><td>✅ Close at 50%, redeploy</td></tr>
+      <tr><td>Flat / slow decay</td><td>Weeks</td><td>✅ Close at 50% OR 21 DTE</td></tr>
+    </table>
+
+    <div class="decision-node" style="border-left-color:#f6ad55; margin-top:10px;">
+      <div class="label" style="color:#f6ad55;">⚠️ Why Not Wait for 80–90% in a Flat Market?</div>
+      <div class="action">The last 10–20% of premium only decays in the final 5–7 days — right when gamma risk is highest. A single 2% SPY drop in that window can erase weeks of patient waiting.<br><br>
+      <strong>The rule applies regardless of market condition.</strong> Market conditions only determine HOW QUICKLY you reach 50%, not whether you use the rule.</div>
+    </div>
+
+    <div class="quote" style="margin-top:12px;">
+      <p>"50% profit OR 21 DTE remaining — whichever comes first, close it. Market condition only determines how fast you get there."</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🚫 Why Not Let Options Expire Worthless?</h2>
+    <div class="highlight">Sold put for $6.00. Looks almost free in final week...
+
+Day 23: put worth $0.80  ← "almost there!"
+Day 24: SPY drops 2%  →  put jumps to $2.50
+Day 25: SPY drops 1%  →  put jumps to $5.00
+Day 30: You scramble to close at $4.50
+
+Final profit: $1.50 instead of $5.20 ❌
+This is the gamma trap.</div>
+    <h3>Only Let Expire If:</h3>
+    <div class="rule-box"><div class="rule-num">1</div><div class="rule-text">You intentionally WANT assignment (running the Wheel)</div></div>
+    <div class="rule-box"><div class="rule-num">2</div><div class="rule-text">Put is worth $0.05–0.10 — commission to close costs more than risk remaining</div></div>
+  </div>
+</div>
+
+<!-- ROLLING RULES -->
+<div id="rolling" class="content">
+  <div class="card">
+    <h2>🔄 When and How to Roll</h2>
+    <p style="margin-bottom:10px; font-size:0.8rem; color:#718096;">Rolling = close current position + open new one. Always aim for a net credit.</p>
+    <table>
+      <tr><th>Scenario</th><th>Roll Action</th></tr>
+      <tr><td>SPY drops, still 2+ weeks to expiry</td><td>Roll out in time — same strike, later expiry</td></tr>
+      <tr><td>SPY drops sharply, near expiry</td><td>Roll down AND out — lower strike, later expiry</td></tr>
+      <tr><td>SPY rallies, 50% profit hit</td><td>Close early, open fresh position</td></tr>
+      <tr><td>VIX spikes mid-trade</td><td>Consider closing — IV crush will help after the spike</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>♻️ The 50% Redeploy Cycle</h2>
+    <div class="highlight">Jan 15: Sell SPY $600 May Put → collect $600
+Jan 15: Set GTC limit buy at $3.00 (50% of $6.00)
+
+Jan 25: SPY rallies, put decays to $3.00 → AUTO CLOSES ✅
+        Profit: $300 in just 10 days
+
+Jan 25: Immediately sell SPY $610 Jun Put → collect $580
+Feb 10: 50% rule hit again → close, collect $290
+
+Cycle 1 + Cycle 2 = $590 in ~26 days
+vs waiting full expiry = $600 in 30 days (with far more risk)</div>
+
+    <h3>Annual Cycle Comparison</h3>
+    <table>
+      <tr><th>Approach</th><th>Cycles/Year</th><th>Premium/Cycle</th><th>Annual Income</th></tr>
+      <tr><td>Wait for expiry (30 DTE)</td><td>~12</td><td>$600</td><td>~$7,200</td></tr>
+      <tr><td>50% rule + redeploy (~15 DTE avg)</td><td>~18–20</td><td>$300–400</td><td>~$6,000–8,000</td></tr>
+    </table>
+    <p style="margin-top:8px; font-size:0.77rem; color:#718096;">Similar income — but significantly less time exposed to tail risk each cycle.</p>
+  </div>
+
+  <div class="card">
+    <h2>⚙️ GTC Order — Set It and Forget It</h2>
+    <div class="highlight">You sell put for $6.00
+→ Immediately place GTC limit buy order at $3.00
+
+When put decays to $3.00, it closes automatically.
+No need to watch it daily.
+Capital freed → redeploy immediately.</div>
+  </div>
+
+  <div class="card">
+    <h2>⏰ 21 DTE Reached — What If I'm at a Loss?</h2>
+    <p style="font-size:0.8rem; color:#a0aec0; margin-bottom:12px;">21 DTE is a hard action trigger — not a suggestion. Waiting for a bounce is not an option because gamma accelerates losses rapidly inside this window.</p>
+
+    <div class="highlight">Why you can't just wait a few more days:
+
+Outside 21 DTE:           Inside 21 DTE:
+─────────────────         ──────────────────
+Theta dominates           Gamma dominates
+Slow, predictable         Fast, unpredictable
+1% SPY drop               1% SPY drop
+= put moves ~$0.50        = put moves ~$2.00–3.00
+
+"Waiting for a bounce" inside 21 DTE is how
+a $300 loss becomes a $1,900 loss overnight.</div>
+
+    <h3>Decision Framework at 21 DTE With a Loss</h3>
+    <table>
+      <tr><th>Loss Size</th><th>Meaning</th><th>Action</th></tr>
+      <tr><td>Loss &lt; 1× premium</td><td>Small, manageable</td><td><span class="badge badge-yellow">Roll down and out</span></td></tr>
+      <tr><td>Loss = 2× premium</td><td>Stop loss triggered</td><td><span class="badge badge-red">Close immediately</span></td></tr>
+      <tr><td>Loss &gt; 2× premium</td><td>Strike likely breached</td><td><span class="badge badge-red">Close or accept assignment</span></td></tr>
+    </table>
+
+    <h3 style="margin-top:14px;">Rolling at a Loss — Example</h3>
+    <div class="highlight">Sold $600 May Put for $600. At 21 DTE, put worth $900 (down $300).
+
+Action: Roll down and out
+→ Buy back $600 May put at $900  (loss of $300)
+→ Sell $585 Jun put for $700
+→ Net debit: $200
+
+New position: $585 Jun put, fresh 30 DTE
+SPY needs to fall further to threaten you
+Theta is working for you again ✅</div>
+
+    <div class="decision-node" style="border-left-color:#f6ad55; margin-top:10px;">
+      <div class="label" style="color:#f6ad55;">⚠️ Important Rule on Rolling at a Loss</div>
+      <div class="action">Never roll just to avoid realising a loss. Only roll if:<br>
+      1. You genuinely believe SPY will stabilise or recover<br>
+      2. You're comfortable being assigned at the new lower strike<br><br>
+      If the market is in a clear downtrend (sustained selloff), closing for a defined loss and waiting for a better re-entry is smarter than rolling deeper into trouble.</div>
+    </div>
+  </div>
+</div>
+
+<!-- RISK RULES -->
+<div id="risk" class="content">
+  <div class="card">
+    <h2>🛡️ The 6 Non-Negotiable Rules</h2>
+    <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>Never sell more puts than you can afford assignment on</strong> — always hold full cash secured</div></div>
+    <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>Max 25–30% of liquid portfolio</strong> in put selling at any one time</div></div>
+    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>No selling puts the week before</strong> Fed meetings, CPI prints, or major earnings</div></div>
+    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>Keep a trade journal</strong> — every trade: entry, exit, premium, reason, outcome</div></div>
+    <div class="rule-box"><div class="rule-num">5</div><div class="rule-text"><strong>VIX above 35 → stop opening new positions</strong>. Market dislocations can blow through strikes fast</div></div>
+    <div class="rule-box"><div class="rule-num">6</div><div class="rule-text"><strong>Stop loss:</strong> Close if loss = 2× premium collected (collected $600 → exit at $1,200 loss)</div></div>
+  </div>
+
+  <div class="card">
+    <h2>📉 VIX Action Guide</h2>
+    <table>
+      <tr><th>VIX Level</th><th>Status</th><th>OTM Target</th><th>Strategy</th></tr>
+      <tr><td>Below 18</td><td><span class="badge badge-green">Normal</span></td><td>5–7%</td><td>CSP or BPS</td></tr>
+      <tr><td>18–25 (now)</td><td><span class="badge badge-yellow">Elevated</span></td><td>8–10%</td><td>BPS preferred</td></tr>
+      <tr><td>25–35</td><td><span class="badge badge-red">High</span></td><td>10–12%</td><td>BPS only</td></tr>
+      <tr><td>Above 35</td><td><span class="badge badge-red">Pause</span></td><td>15%+ or wait</td><td>No new positions</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>⚡ Gamma Risk — The Final Week Trap</h2>
+    <div class="highlight">Inside 21 DTE, your position changes character:
+
+BEFORE 21 DTE → Theta-driven (slow, predictable decay) ✅
+AFTER  21 DTE → Gamma-driven (explosive sensitivity to moves) ⚠️
+
+A delta 0.20 strike can become delta 0.50 overnight
+if SPY drops 3% in the final week.
+
+This is why 21 DTE is the hard close rule — no exceptions.</div>
+  </div>
+
+  <div class="disclaimer">
+    <p>⚠️ <strong>Disclaimer:</strong> This is an educational reference only, not financial advice. Options trading involves significant risk of loss. Consult a licensed financial advisor before trading. Confirm SPY options are available on your IBKR and Moomoo account tiers.</p>
+  </div>
+</div>
+
+<!-- EXAMPLES -->
+<div id="examples" class="content">
+  <div class="card">
+    <h2>📋 Example A — Cash-Secured Put on IBKR</h2>
+    <div class="highlight">SPY $655, VIX ~24, May expiry (~35 DTE)
+
+SELL 1x SPY May 16 $600 Put  (delta ~0.18)
+─────────────────────────────────────────
+Premium collected:   ~$500/contract
+Cash reserved:        $60,000 USD
+Max profit:           $500 (SPY stays above $600)
+Breakeven:            $600 - $5 = $595
+Safety cushion:       SPY must drop ~8.4% to breach
+
+Action on entry:      Set GTC buy at $2.50 (50% target)</div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Example B — Bull Put Spread on Moomoo</h2>
+    <div class="highlight">SPY $655, VIX ~24, May expiry
+
+SELL 1x SPY May 16 $600 Put
+BUY  1x SPY May 16 $585 Put
+────────────────────────────────────────
+Net premium:          ~$300/contract
+Max loss:             ($15 spread × 100) - $300 = $1,200
+Capital required:     ~$1,500 per spread
+Return on capital:    ~20% if max profit
+
+Run 10 spreads = $3,000 income potential
+with same capital as 1 CSP ($15,000 vs $60,000)</div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Example C — 50% Rule + Redeploy</h2>
+    <div class="highlight">Jan 15: Sell $600 May Put → collect $600
+        Set GTC buy at $3.00
+
+Jan 25: SPY rallies to $675
+        Put decays to $3.00 → AUTO CLOSES
+        Profit: $300 in 10 days ✅
+
+Jan 25: Redeploy → Sell $610 Jun Put → collect $580
+Feb 8:  50% hit again → close, profit $290
+
+Total: $590 in 24 days
+Full expiry would have been: $600 in 30 days
+With far more risk in the final week.</div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Example D — Rolling When Strike Is Threatened</h2>
+    <div class="highlight">Position: $600 May Put, collected $600
+SPY drops to $608 (1.2% above strike) → ACT
+
+Decision: Roll down and out
+────────────────────────────────────
+Buy back $600 May Put:   costs $850  (loss of $250)
+Sell $580 Jun Put:       collects $700
+Net cost of roll:        $150 debit (small price to buy space)
+
+New position: $580 Jun Put
+SPY now needs to drop another 4.3% to breach ✅
+You've bought time and distance.</div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Example E — Accept Assignment + Start Wheel</h2>
+    <div class="highlight">Position: $600 May Put, collected $600
+SPY falls to $585 at expiry → Assigned
+
+You now own 100 SPY shares at $600
+Effective cost basis: $600 - $6 = $594
+
+Next day: Sell 1x SPY Jun $615 Covered Call → collect $400
+If SPY recovers to $615 → shares called away
+Total profit: $600 (put premium) + $400 (call premium)
+            + $2,100 capital gain ($615 - $594 × 100)
+            = $3,100 on the full Wheel cycle ✅</div>
+  </div>
+
+  <div class="disclaimer">
+    <p>⚠️ <strong>Disclaimer:</strong> Educational reference only, not financial advice. Always consult a licensed advisor before trading options.</p>
+  </div>
+</div>
+
+<script>
+  function showTab(id, el) {
+    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

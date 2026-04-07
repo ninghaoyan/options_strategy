@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TQQQ Covered Call Strategy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #1a1f2e, #252d3d); padding: 24px 20px; border-bottom: 1px solid #2d3748; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #718096; text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+  .back-link:hover { color: #63b3ed; }
+  header h1 { font-size: 1.4rem; font-weight: 700; color: #63b3ed; }
+  header p { font-size: 0.8rem; color: #718096; margin-top: 4px; }
+  .tabs { display: flex; overflow-x: auto; background: #1a1f2e; border-bottom: 1px solid #2d3748; padding: 0 12px; gap: 4px; }
+  .tab { padding: 12px 14px; font-size: 0.75rem; font-weight: 600; color: #718096; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; }
+  .tab.active { color: #63b3ed; border-bottom-color: #63b3ed; }
+  .tab:hover:not(.active) { color: #a0aec0; }
+  .content { display: none; padding: 16px; max-width: 800px; margin: 0 auto; }
+  .content.active { display: block; }
+  .card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+  .card h2 { font-size: 0.95rem; font-weight: 700; color: #63b3ed; margin-bottom: 12px; }
+  .card h3 { font-size: 0.82rem; font-weight: 600; color: #a0aec0; margin: 12px 0 8px; }
+  .card p, .card li { font-size: 0.8rem; color: #cbd5e0; line-height: 1.6; }
+  .card ul { padding-left: 16px; }
+  .card li { margin-bottom: 4px; }
+  .highlight { background: #252d3d; border-left: 3px solid #63b3ed; border-radius: 6px; padding: 12px; margin: 10px 0; font-size: 0.78rem; color: #e2e8f0; font-family: monospace; line-height: 1.8; white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.77rem; }
+  th { background: #252d3d; color: #63b3ed; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { padding: 8px 10px; border-bottom: 1px solid #2d3748; color: #cbd5e0; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #252d3d; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+  .badge-green { background: #1a3a2a; color: #68d391; }
+  .badge-yellow { background: #3a2f1a; color: #f6ad55; }
+  .badge-red { background: #3a1a1a; color: #fc8181; }
+  .badge-blue { background: #1a2a3a; color: #63b3ed; }
+  .decision-node { background: #252d3d; border-radius: 8px; padding: 12px; margin: 8px 0; border-left: 3px solid #4a5568; }
+  .decision-node.green { border-left-color: #68d391; }
+  .decision-node.yellow { border-left-color: #f6ad55; }
+  .decision-node.red { border-left-color: #fc8181; }
+  .decision-node .label { font-size: 0.72rem; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .decision-node .action { font-size: 0.8rem; color: #e2e8f0; line-height: 1.6; }
+  .rule-box { display: flex; align-items: flex-start; gap: 10px; background: #252d3d; border-radius: 8px; padding: 12px; margin: 8px 0; }
+  .rule-num { background: #63b3ed; color: #0f1117; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+  .rule-text { font-size: 0.8rem; color: #cbd5e0; line-height: 1.5; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 560px) { .three-col { grid-template-columns: 1fr; } }
+  .zone-card { background: #252d3d; border-radius: 8px; padding: 14px; border-top: 3px solid #4a5568; }
+  .zone-card.zone-a { border-top-color: #68d391; }
+  .zone-card.zone-b { border-top-color: #63b3ed; }
+  .zone-card.zone-c { border-top-color: #f6ad55; }
+  .zone-card h4 { font-size: 0.84rem; font-weight: 700; margin-bottom: 8px; }
+  .zone-card.zone-a h4 { color: #68d391; }
+  .zone-card.zone-b h4 { color: #63b3ed; }
+  .zone-card.zone-c h4 { color: #f6ad55; }
+  .zone-card .zone-tag { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .zone-card.zone-a .zone-tag { color: #68d391; }
+  .zone-card.zone-b .zone-tag { color: #63b3ed; }
+  .zone-card.zone-c .zone-tag { color: #f6ad55; }
+  .zone-card p { font-size: 0.77rem; color: #a0aec0; line-height: 1.6; }
+  .quote { background: #1e2a1e; border: 1px solid #2d4a2d; border-radius: 8px; padding: 14px; margin: 10px 0; }
+  .quote p { font-size: 0.82rem; color: #68d391; font-style: italic; line-height: 1.6; }
+  .disclaimer { background: #2d2000; border: 1px solid #744210; border-radius: 8px; padding: 12px; margin-top: 16px; }
+  .disclaimer p { font-size: 0.75rem; color: #f6ad55; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="index.html">&#8592; Back to Strategy Hub</a>
+  <h1>&#128200; TQQQ Covered Call Strategy</h1>
+  <p>Income While Waiting for Your Exit &middot; TQQQ ~$43.80 &middot; VIX ~24 &middot; 600 Shares</p>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('overview', this)">Overview</div>
+  <div class="tab" onclick="showTab('mechanics', this)">How It Works</div>
+  <div class="tab" onclick="showTab('zones', this)">Share Zones</div>
+  <div class="tab" onclick="showTab('strike', this)">Strike &amp; Expiry</div>
+  <div class="tab" onclick="showTab('management', this)">Management</div>
+  <div class="tab" onclick="showTab('risk', this)">Risk Rules</div>
+  <div class="tab" onclick="showTab('examples', this)">Examples</div>
+</div>
+
+<!-- OVERVIEW -->
+<div id="overview" class="content active">
+  <div class="card">
+    <h2>&#127919; Your Situation at a Glance</h2>
+    <table>
+      <tr><th>Item</th><th>Detail</th></tr>
+      <tr><td>Ticker</td><td>TQQQ &mdash; ProShares UltraPro QQQ (3&times; leveraged Nasdaq)</td></tr>
+      <tr><td>Shares held</td><td>~600 shares</td></tr>
+      <tr><td>Cost basis</td><td>Below $40/share</td></tr>
+      <tr><td>Current price</td><td>~$43.80 (~8% in profit)</td></tr>
+      <tr><td>Target exit range</td><td>$48&ndash;$56 (20&ndash;40% above cost basis)</td></tr>
+      <tr><td>Exit plan</td><td>Rotate into QQQ / VOO on exit</td></tr>
+      <tr><td>CC goal</td><td>Collect income while waiting for a good exit price</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>&#128260; The Two Outcomes &mdash; Both Are Wins</h2>
+    <div class="highlight">You sell a call at $50 strike, collect $1.80 premium
+Set GTC buy-back at $0.90 (50% profit target)
+
+Outcome A: TQQQ stays flat or drifts
+  Call loses value through theta decay
+  GTC hits $0.90 &rarr; auto-closes
+  Pocket income, shares stay &rarr; sell another call next cycle
+
+Outcome B: TQQQ rockets past $50
+  Call GAINS value (goes from $1.80 &rarr; $5.00+)
+  GTC at $0.90 NEVER triggers (wrong direction)
+  At expiry &rarr; shares called away at $50
+  Your planned exit executing &rarr; rotate to QQQ/VOO</div>
+    <div class="quote">
+      <p>"The 50% GTC only fires when the call loses value via theta. When TQQQ rallies past your strike, the call gains value instead &mdash; your exit executes naturally at expiry."</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#9888;&#65039; Why TQQQ Is Different From SPY</h2>
+    <table>
+      <tr><th>Factor</th><th>SPY / QQQ</th><th>TQQQ (3&times; Leveraged)</th></tr>
+      <tr><td>Typical daily move</td><td>0.5&ndash;1%</td><td>1.5&ndash;3%</td></tr>
+      <tr><td>Implied volatility</td><td>Moderate</td><td>Very high &rarr; fat premiums</td></tr>
+      <tr><td>Can spike 10%+ in days?</td><td>Rare</td><td>Yes &mdash; common on Nasdaq rallies</td></tr>
+      <tr><td>Structural decay over time</td><td>None</td><td>Yes &mdash; volatility drag erodes NAV</td></tr>
+      <tr><td>Best CC strike distance</td><td>5&ndash;8% OTM</td><td>8&ndash;15% OTM given vol</td></tr>
+      <tr><td>Assignment risk</td><td>Gradual</td><td>Can happen fast &mdash; plan for it</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>&#128176; Estimated Monthly Income on 400 Covered Shares</h2>
+    <table>
+      <tr><th>Zone</th><th>Shares</th><th>Strike</th><th>Est. Premium/Share</th><th>Monthly Est.</th></tr>
+      <tr><td>Zone B</td><td>200</td><td>$50&ndash;52</td><td>~$1.00&ndash;1.20</td><td>~$200&ndash;240</td></tr>
+      <tr><td>Zone C</td><td>200</td><td>$47&ndash;48</td><td>~$1.50&ndash;2.00</td><td>~$300&ndash;400</td></tr>
+      <tr><td><strong>Combined</strong></td><td><strong>400</strong></td><td></td><td></td><td><strong>~$500&ndash;640/cycle</strong></td></tr>
+    </table>
+    <p style="margin-top:10px; color:#718096; font-size:0.75rem;">Zone A (200 shares) kept uncovered &mdash; full upside participation if TQQQ surges past $56.</p>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div id="mechanics" class="content">
+  <div class="card">
+    <h2>&#128208; The Core Mechanic &mdash; Call Price vs Share Price</h2>
+    <p style="margin-bottom:12px;">When you sell a covered call, the call option price moves <strong>opposite</strong> to your interest as the seller:</p>
+    <div class="highlight">TQQQ price goes UP   &rarr; call becomes MORE valuable &rarr; bad for you as seller
+TQQQ price goes DOWN &rarr; call becomes LESS valuable &rarr; good for you as seller
+
+This is opposite to how you think about your shares:
+  Shares go up   = your wealth increases
+  Call price goes up = your liability as seller increases</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128202; The Same $1.80 Call &mdash; Three Scenarios</h2>
+    <p style="margin-bottom:10px; font-size:0.8rem; color:#a0aec0;">TQQQ at $43.80, you sell a $50 call for $1.80. GTC buy-back set at $0.90.</p>
+    <table>
+      <tr><th>TQQQ Price</th><th>Call Value</th><th>GTC Status</th><th>Outcome</th></tr>
+      <tr><td>Falls to $38</td><td>~$0.15</td><td>Already fired at $0.90</td><td><span class="badge badge-green">Income collected, shares stay</span></td></tr>
+      <tr><td>Flat at $44</td><td>Decays to $0.90</td><td>GTC fires</td><td><span class="badge badge-green">Income collected, shares stay</span></td></tr>
+      <tr><td>Surges to $53</td><td>~$4.50+</td><td>Never fires (wrong direction)</td><td><span class="badge badge-blue">Shares called away at $50 &mdash; exit!</span></td></tr>
+    </table>
+    <div class="highlight" style="margin-top:12px;">The key insight:
+
+Call LOSING value = theta winning = income farming = shares stay
+Call GAINING value = TQQQ rallying = exit executing = shares leave at target
+
+These are opposite market conditions producing opposite outcomes.
+Both serve your dual goal: income while flat OR exit at a good price.</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128260; Why the 50% Rule Still Applies</h2>
+    <div class="highlight">You sell $50 call for $1.80. TQQQ stays flat.
+
+Week 1:  call worth $1.60   (slow theta)
+Week 2:  call worth $1.10   (theta accelerating)
+Week 3:  call worth $0.90 &rarr; GTC fires. Close here.
+
+Why not wait for $0.05 (let expire)?
+
+Inside 21 DTE, a single Nasdaq news event can
+spike TQQQ 8&ndash;10% and turn a $0.90 call into
+a $4.00 call overnight.
+
+The last $0.90 of premium is NOT worth that risk.
+Close at 50%, sell a fresh call, reset the clock.</div>
+    <div class="decision-node yellow">
+      <div class="label">&#9888;&#65039; TQQQ-Specific Gamma Warning</div>
+      <div class="action">TQQQ's 3&times; leverage amplifies gamma effects vs SPY. A 2% Nasdaq move = ~6% TQQQ move. Inside 21 DTE, this can turn a comfortable OTM call into a deep ITM problem within hours. The 50% / 21 DTE rule is even more critical here than on SPY.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE ZONES -->
+<div id="zones" class="content">
+  <div class="card">
+    <h2>&#128193; The Three-Zone Framework &mdash; 600 Shares</h2>
+    <p style="margin-bottom:14px; font-size:0.8rem; color:#a0aec0;">Don't sell calls on all 600 shares. Split into zones with different objectives. Zone A ensures you always capture full upside if TQQQ surges past your target.</p>
+    <div class="three-col">
+      <div class="zone-card zone-a">
+        <div class="zone-tag">Zone A &middot; 200 shares</div>
+        <h4>&#127956;&#65039; Home Run Insurance</h4>
+        <p>No covered calls. Full upside participation if TQQQ recovers to $60+. Your protection against capping the exit too early.</p>
+      </div>
+      <div class="zone-card zone-b">
+        <div class="zone-tag">Zone B &middot; 200 shares</div>
+        <h4>&#127919; Mid-Target Exit</h4>
+        <p>Sell calls at $50&ndash;52 strike. Good exit price if called away. Moderate premium income each cycle.</p>
+      </div>
+      <div class="zone-card zone-c">
+        <div class="zone-tag">Zone C &middot; 200 shares</div>
+        <h4>&#128176; Income First</h4>
+        <p>Sell calls at $47&ndash;49 strike. Higher premium, higher chance of being called away. Acceptable exit at 20%+ above cost basis.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#128202; Zone Comparison</h2>
+    <table>
+      <tr><th>Zone</th><th>Shares</th><th>Strike</th><th>Premium/Share</th><th>Call-Away Risk</th><th>Purpose</th></tr>
+      <tr><td><span class="badge badge-green">Zone A</span></td><td>200</td><td>None</td><td>$0</td><td>None</td><td>Full upside capture</td></tr>
+      <tr><td><span class="badge badge-blue">Zone B</span></td><td>200</td><td>$50&ndash;52</td><td>~$1.00&ndash;1.20</td><td>Moderate</td><td>Income + high exit price</td></tr>
+      <tr><td><span class="badge badge-yellow">Zone C</span></td><td>200</td><td>$47&ndash;49</td><td>~$1.50&ndash;2.00</td><td>Higher</td><td>Max income + acceptable exit</td></tr>
+    </table>
+    <div class="quote" style="margin-top:12px;">
+      <p>"Zone A is not laziness &mdash; it's intentional. It's what protects you from capping your exit at $49 when TQQQ rips to $65."</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#128260; How Zones Evolve as Shares Get Called Away</h2>
+    <div class="highlight">Starting: 600 shares at ~$38 cost basis, TQQQ at $43.80
+
+Phase 1 (TQQQ $42&ndash;48, range-bound):
+  Zone A: No calls &mdash; hold untouched
+  Zone B: Collecting ~$1.00&ndash;1.20/share/cycle income
+  Zone C: Collecting ~$1.50&ndash;2.00/share/cycle income
+  Monthly income: ~$500&ndash;640
+
+Phase 2 (TQQQ rallies to $49):
+  Zone C calls trigger &rarr; 200 shares exit at $47&ndash;49
+  Rotate ~$9,400&ndash;9,800 into QQQ/VOO
+  Now running Zone A + Zone B only (400 shares)
+
+Phase 3 (TQQQ rallies to $52):
+  Zone B calls trigger &rarr; 200 shares exit at $50&ndash;52
+  Rotate ~$10,000&ndash;10,400 into QQQ/VOO
+  Zone A (200 shares) still running full upside
+
+Phase 4 (TQQQ at $60+):
+  Decide: sell Zone A calls at high strike, or sell outright
+  Full TQQQ exit complete &rarr; Fully rotated into QQQ/VOO</div>
+  </div>
+</div>
+
+<!-- STRIKE & EXPIRY -->
+<div id="strike" class="content">
+  <div class="card">
+    <h2>&#127919; Strike Selection &mdash; The Happy-to-Sell Test</h2>
+    <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>Would I be happy if my shares were called away at this price?</strong> If yes &rarr; proceed. If no &rarr; go higher. Never sell a call at a strike you'd regret.</div></div>
+    <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>Is the strike above my cost basis?</strong> Always. Selling a call below cost basis means locking in a loss if called away.</div></div>
+    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>Delta check:</strong> Zone B &rarr; delta 0.20&ndash;0.25. Zone C &rarr; delta 0.25&ndash;0.30. Higher delta = more premium, higher chance of assignment.</div></div>
+    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>OTM% sanity check:</strong> With VIX ~24, target at least 8&ndash;12% OTM for TQQQ. A 4% Nasdaq rally = 12% TQQQ move &mdash; your strike needs breathing room.</div></div>
+  </div>
+
+  <div class="card">
+    <h2>&#128208; Strike Reference &mdash; TQQQ at ~$43.80</h2>
+    <table>
+      <tr><th>Strike</th><th>OTM%</th><th>Delta (approx)</th><th>Est. Premium</th><th>Zone</th><th>Notes</th></tr>
+      <tr><td>$47</td><td>7.3%</td><td>~0.30</td><td>~$2.00</td><td><span class="badge badge-yellow">Zone C</span></td><td>Higher income, faster assignment</td></tr>
+      <tr><td>$48</td><td>9.6%</td><td>~0.27</td><td>~$1.75</td><td><span class="badge badge-yellow">Zone C</span></td><td>Good income, ~20% above cost basis</td></tr>
+      <tr><td>$50</td><td>14.2%</td><td>~0.22</td><td>~$1.20</td><td><span class="badge badge-blue">Zone B</span></td><td>Balanced income + exit target</td></tr>
+      <tr><td>$52</td><td>18.7%</td><td>~0.17</td><td>~$0.90</td><td><span class="badge badge-blue">Zone B</span></td><td>Less premium, higher exit price</td></tr>
+      <tr><td>$55+</td><td>25%+</td><td>&lt;0.12</td><td>~$0.50</td><td><span class="badge badge-green">Zone A-ish</span></td><td>Minimal premium &mdash; barely worth it</td></tr>
+    </table>
+    <p style="margin-top:8px; font-size:0.75rem; color:#718096;">Premiums are estimates at VIX ~24, 45 DTE. Actual premiums depend on IV at time of trade.</p>
+  </div>
+
+  <div class="card">
+    <h2>&#128197; Expiry (DTE) &mdash; TQQQ Needs More Runway</h2>
+    <table>
+      <tr><th>DTE at Entry</th><th>Verdict</th><th>Reason</th></tr>
+      <tr><td>7&ndash;21 days</td><td><span class="badge badge-red">Avoid</span></td><td>TQQQ can move 15% in a week &mdash; barely time to react before gamma explodes</td></tr>
+      <tr><td>21&ndash;30 days</td><td><span class="badge badge-yellow">Too short</span></td><td>21 DTE hard-close rule triggers almost immediately after entry</td></tr>
+      <tr><td><strong>45 DTE</strong></td><td><span class="badge badge-green">Sweet spot &#10003;</span></td><td>Full theta runway, ~24 days before 21 DTE trigger, time for 50% rule to work</td></tr>
+      <tr><td>60+ days</td><td><span class="badge badge-blue">Acceptable</span></td><td>More premium, slower early decay &mdash; ties up shares longer</td></tr>
+    </table>
+    <div class="highlight" style="margin-top:12px;">Rule: Sell at 45 DTE for TQQQ (vs 30&ndash;45 DTE for SPY)
+
+Reason: TQQQ's extra volatility means you need the longer runway.
+A surprise Nasdaq surge the week after entry can immediately
+threaten a 30 DTE strike. With 45 DTE you have room to manage.
+
+Hard close trigger: 21 DTE &mdash; same as SPY, no exceptions.</div>
+  </div>
+</div>
+
+<!-- MANAGEMENT -->
+<div id="management" class="content">
+  <div class="card">
+    <h2>&#128678; The Master Decision Flow</h2>
+    <div class="highlight">Sell call at 45 DTE (Zone B or C)
+         &darr;
+Set GTC limit buy at 50% of premium immediately
+         &darr;
+Monitor weekly (check more often near macro events)
+         &darr;
+    &boxvr;&mdash; 50% profit hit (any time)?
+    &boxv;        &rarr; Close, sell fresh call at current strike/market
+    &boxv;
+    &boxvr;&mdash; 21 DTE reached, in profit?
+    &boxv;        &rarr; Close anyway &mdash; TQQQ gamma risk is amplified
+    &boxv;
+    &boxvr;&mdash; 21 DTE reached, at a loss?
+    &boxv;        &boxvr;&mdash; Loss manageable &rarr; Roll up and out for net credit
+    &boxv;        &boxur;&mdash; Loss large &rarr; Close, accept reduced total premium
+    &boxv;
+    &boxvr;&mdash; TQQQ spikes, strike threatened?
+    &boxv;        &boxvr;&mdash; Zone B/C &rarr; Consider letting assignment happen (that's your exit!)
+    &boxv;        &boxur;&mdash; Want to keep shares &rarr; Roll up and out before expiry
+    &boxv;
+    &boxur;&mdash; Call worth less than $0.05? &rarr; Let expire (commission not worth it)</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128203; Profit-Taking Rules</h2>
+    <table>
+      <tr><th>Situation</th><th>Action</th></tr>
+      <tr><td>50% profit hit at any DTE</td><td><span class="badge badge-green">Close immediately, sell fresh call</span></td></tr>
+      <tr><td>21 DTE reached, less than 50% profit</td><td><span class="badge badge-yellow">Close anyway &mdash; TQQQ gamma risk</span></td></tr>
+      <tr><td>TQQQ spikes 10%+ toward strike</td><td><span class="badge badge-yellow">Decide: roll up or accept assignment</span></td></tr>
+      <tr><td>Inside 14 DTE, 70%+ profit</td><td><span class="badge badge-yellow">Close &mdash; last 30% not worth the risk</span></td></tr>
+      <tr><td>Call worth less than $0.05</td><td><span class="badge badge-blue">Let expire &mdash; commission exceeds risk</span></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>&#9874;&#65039; When TQQQ Threatens Your Strike</h2>
+    <p style="margin-bottom:10px; font-size:0.8rem; color:#718096;">Example: You sold a Zone C $48 call. TQQQ surges toward $48.</p>
+    <div class="decision-node green">
+      <div class="label">&#10003; TQQQ at $44&ndash;45 (still 6&ndash;9% below strike)</div>
+      <div class="action">&rarr; Do nothing &mdash; comfortable room, GTC is working.<br>&rarr; Check for upcoming macro events this week.</div>
+    </div>
+    <div class="decision-node yellow">
+      <div class="label">&#9888; TQQQ at $46&ndash;47 (within 2&ndash;4% of strike)</div>
+      <div class="action">&rarr; Monitor daily. Decide NOW: will you accept assignment at $48 or roll?<br>&rarr; If $48 is an acceptable exit &rarr; let it ride. The plan is working.<br>&rarr; If you want to keep these shares &rarr; roll up and out before it goes ITM.</div>
+    </div>
+    <div class="decision-node red">
+      <div class="label">&#128680; TQQQ at $48+ (strike breached, ITM)</div>
+      <div class="action">Option 1: Do nothing &rarr; assignment at expiry at $48 (Zone C exit executing)<br>Option 2: Roll up and out &rarr; buy back $48 call, sell $51 next month for net credit<br>Option 3: Buy back at a loss &mdash; only if you strongly need to keep these shares</div>
+    </div>
+    <div class="decision-node" style="border-left-color:#68d391; margin-top:4px;">
+      <div class="label" style="color:#68d391;">&#128161; Key Mindset: Assignment = Success in Zone B/C</div>
+      <div class="action">For Zone B and C &mdash; assignment is NOT a bad outcome. It IS the exit strategy. When your call goes ITM in these zones, that's your plan working. Don't panic-roll just to avoid losing shares you intended to sell anyway.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#128197; Macro Events &mdash; TQQQ No-Sell Zones</h2>
+    <div class="rule-box"><div class="rule-num">!</div><div class="rule-text"><strong>Never open a new TQQQ covered call in the week before:</strong> Fed meetings and rate decisions &middot; CPI / PCE inflation prints &middot; Major big-tech earnings (AAPL, MSFT, NVDA, META, AMZN, GOOGL) &middot; Any event that could spike or crash Nasdaq 3&ndash;5%+</div></div>
+    <p style="margin-top:10px; font-size:0.8rem; color:#a0aec0;">TQQQ amplifies every Nasdaq move by 3&times;. A 4% Nasdaq gap = 12% TQQQ gap. A surprise event can move your call from comfortable OTM to deep ITM before you can react.</p>
+  </div>
+</div>
+
+<!-- RISK RULES -->
+<div id="risk" class="content">
+  <div class="card">
+    <h2>&#128737;&#65039; Non-Negotiable Rules for TQQQ Covered Calls</h2>
+    <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>Never sell calls on Zone A shares.</strong> Every covered call is a potential exit. Zone A (200 shares) always stays uncovered &mdash; this is your upside insurance.</div></div>
+    <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>Never sell a call below your cost basis.</strong> If TQQQ drops to $37 and you sell a $39 call for premium, you're locking in a loss on exit. Strike must always be above cost basis.</div></div>
+    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>No calls the week before major macro events.</strong> Fed, CPI, big-tech earnings. TQQQ is 3&times; leveraged &mdash; a single event can blow your strike in hours.</div></div>
+    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>21 DTE is the hard close trigger &mdash; no exceptions.</strong> Gamma on a leveraged ETF inside 21 DTE is brutal. A 3% Nasdaq drop can move your call 4&times; more than it would outside 21 DTE.</div></div>
+    <div class="rule-box"><div class="rule-num">5</div><div class="rule-text"><strong>VIX above 35 &rarr; pause new calls.</strong> Market dislocation can cause TQQQ to gap 15&ndash;20% in a single session. Higher IV means fat premiums but also real blow-up risk.</div></div>
+    <div class="rule-box"><div class="rule-num">6</div><div class="rule-text"><strong>Keep a trade log.</strong> Every call: zone, entry date, strike, expiry, premium, close date, outcome. Track which zone each trade belongs to &mdash; critical for managing the full 600-share picture.</div></div>
+  </div>
+
+  <div class="card">
+    <h2>&#128201; VIX Action Guide for TQQQ</h2>
+    <table>
+      <tr><th>VIX Level</th><th>Status</th><th>Min OTM% for TQQQ</th><th>Action</th></tr>
+      <tr><td>Below 18</td><td><span class="badge badge-green">Normal</span></td><td>8&ndash;10%</td><td>Sell Zone B + C at 45 DTE, delta 0.20&ndash;0.30</td></tr>
+      <tr><td>18&ndash;25 (now)</td><td><span class="badge badge-yellow">Elevated</span></td><td>10&ndash;12%</td><td>Maintain zones, slightly wider strikes than usual</td></tr>
+      <tr><td>25&ndash;35</td><td><span class="badge badge-red">High</span></td><td>12&ndash;15%</td><td>Reduce Zone C activity, widen strikes significantly</td></tr>
+      <tr><td>Above 35</td><td><span class="badge badge-red">Pause</span></td><td>Wait</td><td>No new calls &mdash; wait for vol to settle</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>&#9889; The TQQQ Volatility Decay Reality</h2>
+    <div class="highlight">TQQQ has a structural problem: volatility drag.
+
+Over long periods, 3&times; leveraged ETFs underperform
+3&times; the index return due to daily rebalancing math.
+
+Example:
+Day 1: QQQ -5%  &rarr; TQQQ -15%  (now at $85 from $100)
+Day 2: QQQ +5%  &rarr; TQQQ +15%  (now at $97.75)
+Net: QQQ flat, TQQQ down 2.25% &mdash; this compounds daily.
+
+This is why your covered call income is especially valuable here:
+You're monetising a position that structurally erodes over time.
+
+Collected $1.80/share &times; ~6 cycles over 6 months = ~$10.80/share
+On a $38 cost basis, that's a 28% effective cost basis reduction.
+Even if TQQQ stays flat, you're winning.</div>
+  </div>
+
+  <div class="disclaimer">
+    <p>&#9888;&#65039; <strong>Disclaimer:</strong> This is an educational reference only, not financial advice. TQQQ is a leveraged ETF with amplified risk &mdash; it can lose significant value rapidly and is not suitable for all investors. Options trading adds further complexity and risk. Consult a licensed financial advisor before trading.</p>
+  </div>
+</div>
+
+<!-- EXAMPLES -->
+<div id="examples" class="content">
+  <div class="card">
+    <h2>&#128203; Example A &mdash; Zone C Income Trade (Flat Market)</h2>
+    <div class="highlight">TQQQ at $43.80, VIX ~24, cost basis ~$38
+
+SELL 2x TQQQ Jun 27 $48 Call  (45 DTE, delta ~0.27, Zone C)
+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+Premium collected:   $1.75/share &times; 200 = $350 total
+GTC buy-back set:    $0.875 (50% target)
+If called away:      $350 premium + ($48&ndash;$38) &times; 200 = $2,350 total
+
+3 weeks later: TQQQ drifts flat at $44
+&rarr; Call decays to $0.875 &rarr; GTC fires
+&rarr; Pocket $350 income in 3 weeks
+&rarr; Shares stay &mdash; open new Zone C call next cycle</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128203; Example B &mdash; Zone B Exit Trade (TQQQ Rallies)</h2>
+    <div class="highlight">TQQQ at $43.80, sell Zone B call
+
+SELL 2x TQQQ Jun 27 $51 Call  (45 DTE, delta ~0.20, Zone B)
+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+Premium collected:   $1.10/share &times; 200 = $220 total
+GTC buy-back set:    $0.55/share
+
+Week 3: Tech earnings surprise &rarr; TQQQ surges to $54
+&rarr; Call jumps from $1.10 &rarr; $4.50
+&rarr; GTC at $0.55 never fires (wrong direction)
+&rarr; At expiry: 200 shares called away at $51
+
+P&amp;L on these 200 shares:
+  Premium:                         $220
+  Share gain ($51&ndash;$38) &times; 200:   $2,600
+  Total:                           $2,820
+
+&rarr; Immediately rotate $10,200 (200 &times; $51) into QQQ/VOO</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128203; Example C &mdash; Rolling When Strike Is Threatened</h2>
+    <div class="highlight">Zone C: Sold $48 call for $1.75. TQQQ surges to $47.50.
+18 DTE left &mdash; approaching 21 DTE hard trigger.
+
+Decision: Roll up and out (want to keep shares for now)
+&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;
+Buy back $48 Jun call:        costs $2.80/share (loss of $1.05)
+Sell $51 Jul call (45 DTE):   collects $2.20/share
+Net debit:                    $0.60/share &times; 200 = $120 total cost
+
+New position: $51 Jul call, fresh 45 DTE
+TQQQ needs another 7% rally to breach new strike
+
+Alternative: just accept assignment at $48 instead
+&rarr; Gain: ($48&ndash;$38) &times; 200 + $350 premium = $2,350 total
+&rarr; Rotate $9,600 into QQQ/VOO &rarr; exit done</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128203; Example D &mdash; Full Phase Progression</h2>
+    <div class="highlight">Starting: 600 shares at $38 cost basis, TQQQ at $43.80
+
+Months 1&ndash;3: Range-bound ($42&ndash;48)
+  Zone B + C collecting ~$500&ndash;640/cycle &times; 3 = ~$1,500&ndash;1,920
+  Effective cost basis reduced to ~$35&ndash;36/share
+  Zone A: untouched, full upside exposure
+
+Month 4: TQQQ rallies to $49
+  Zone C ($48 calls) &rarr; 200 shares called away at $48
+  Profit: ($48&ndash;$38) &times; 200 + premiums = ~$2,350+
+  Rotate ~$9,600 into QQQ/VOO
+
+Month 5: TQQQ at $52
+  Zone B ($51 calls) &rarr; 200 shares called away at $51
+  Profit: ($51&ndash;$38) &times; 200 + premiums = ~$2,820+
+  Rotate ~$10,200 into QQQ/VOO
+
+Remaining: Zone A (200 shares)
+  Option: sell calls at $58+, or sell outright if at target
+  Full TQQQ exit complete when ready &rarr; fully in QQQ/VOO</div>
+  </div>
+
+  <div class="disclaimer">
+    <p>&#9888;&#65039; <strong>Disclaimer:</strong> Educational reference only, not financial advice. All premium estimates are illustrative. Actual premiums depend on IV, DTE, and market conditions at time of trade.</p>
+  </div>
+</div>
+
+<script>
+  function showTab(id, el) {
+    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

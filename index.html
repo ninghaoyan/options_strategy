@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Options Strategy Hub</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #1a1f2e, #252d3d); padding: 28px 20px 24px; border-bottom: 1px solid #2d3748; }
+  header h1 { font-size: 1.5rem; font-weight: 700; color: #63b3ed; }
+  header p { font-size: 0.82rem; color: #718096; margin-top: 6px; }
+  .container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+  .section-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #4a5568; margin-bottom: 12px; margin-top: 24px; }
+  .section-label:first-child { margin-top: 0; }
+  .strategy-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 20px; margin-bottom: 12px; text-decoration: none; display: flex; align-items: flex-start; gap: 16px; transition: border-color 0.2s, background 0.2s; cursor: pointer; }
+  .strategy-card:hover { border-color: #4a6fa5; background: #1e2535; }
+  .strategy-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: 2px; }
+  .strategy-info { flex: 1; }
+  .strategy-info h2 { font-size: 1rem; font-weight: 700; color: #63b3ed; margin-bottom: 4px; }
+  .strategy-info p { font-size: 0.8rem; color: #718096; line-height: 1.5; margin-bottom: 10px; }
+  .strategy-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 600; }
+  .tag-blue { background: #1a2a3a; color: #63b3ed; }
+  .tag-green { background: #1a3a2a; color: #68d391; }
+  .tag-yellow { background: #3a2f1a; color: #f6ad55; }
+  .tag-purple { background: #2a1a3a; color: #b794f4; }
+  .arrow { color: #4a5568; font-size: 1.2rem; flex-shrink: 0; margin-top: 18px; transition: color 0.2s; }
+  .strategy-card:hover .arrow { color: #63b3ed; }
+  .coming-soon { opacity: 0.5; cursor: default; }
+  .coming-soon:hover { border-color: #2d3748; background: #1a1f2e; }
+  .coming-soon:hover .arrow { color: #4a5568; }
+  .soon-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 600; background: #2d3748; color: #718096; }
+  .divider { border: none; border-top: 1px solid #2d3748; margin: 8px 0 20px; }
+  .footer { text-align: center; padding: 32px 16px; }
+  .footer p { font-size: 0.72rem; color: #4a5568; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#128200; Options Strategy Hub</h1>
+  <p>Personal reference for income-generating options strategies &middot; Updated April 2026</p>
+</header>
+
+<div class="container">
+
+  <div class="section-label">Put Selling Strategies</div>
+
+  <a class="strategy-card" href="spy_options_strategy_v2.html">
+    <div class="strategy-icon">&#128202;</div>
+    <div class="strategy-info">
+      <h2>SPY &mdash; Cash-Secured Puts &amp; Bull Put Spreads</h2>
+      <p>Income strategy using CSP and BPS on SPY. Covers strike selection via delta, VIX-adjusted OTM%, the 50% / 21 DTE management rules, rolling, and the Wheel strategy.</p>
+      <div class="strategy-meta">
+        <span class="tag tag-blue">Cash-Secured Put</span>
+        <span class="tag tag-blue">Bull Put Spread</span>
+        <span class="tag tag-green">The Wheel</span>
+        <span class="tag tag-yellow">SPY ~$655</span>
+        <span class="tag tag-yellow">VIX ~24</span>
+      </div>
+    </div>
+    <div class="arrow">&#8250;</div>
+  </a>
+
+  <hr class="divider">
+  <div class="section-label">Covered Call Strategies</div>
+
+  <a class="strategy-card" href="tqqq_covered_call.html">
+    <div class="strategy-icon">&#128200;</div>
+    <div class="strategy-info">
+      <h2>TQQQ &mdash; Covered Calls (Income + Exit Strategy)</h2>
+      <p>Selling covered calls on 600 TQQQ shares to generate income while waiting for a planned exit at $48&ndash;$56. Uses a three-zone share framework to balance income vs upside capture.</p>
+      <div class="strategy-meta">
+        <span class="tag tag-blue">Covered Call</span>
+        <span class="tag tag-green">3-Zone Framework</span>
+        <span class="tag tag-purple">3&times; Leveraged ETF</span>
+        <span class="tag tag-yellow">TQQQ ~$43.80</span>
+        <span class="tag tag-yellow">600 Shares</span>
+      </div>
+    </div>
+    <div class="arrow">&#8250;</div>
+  </a>
+
+  <a class="strategy-card coming-soon" href="#">
+    <div class="strategy-icon">&#127381;</div>
+    <div class="strategy-info">
+      <h2>USAR &mdash; Covered Calls (US Oil &amp; Gas ETF)</h2>
+      <p>Covered call income strategy on USAR. Commodity-linked, macro-sensitive. Adjusted for oil price events and OPEC calendar.</p>
+      <div class="strategy-meta">
+        <span class="tag tag-blue">Covered Call</span>
+        <span class="tag tag-yellow">Energy Sector</span>
+        <span class="soon-badge">Coming Soon</span>
+      </div>
+    </div>
+    <div class="arrow">&#8250;</div>
+  </a>
+
+  <a class="strategy-card coming-soon" href="#">
+    <div class="strategy-icon">&#9762;&#65039;</div>
+    <div class="strategy-info">
+      <h2>UUUU &mdash; Covered Calls (Energy Fuels / Uranium)</h2>
+      <p>Covered call income on UUUU uranium miner. High IV, high volatility. Conservative delta approach given gap risk on uranium sector news.</p>
+      <div class="strategy-meta">
+        <span class="tag tag-blue">Covered Call</span>
+        <span class="tag tag-yellow">Uranium / Mining</span>
+        <span class="tag tag-purple">High IV</span>
+        <span class="soon-badge">Coming Soon</span>
+      </div>
+    </div>
+    <div class="arrow">&#8250;</div>
+  </a>
+
+  <hr class="divider">
+  <div class="section-label">Planned Strategies</div>
+
+  <a class="strategy-card coming-soon" href="#">
+    <div class="strategy-icon">&#127959;&#65039;</div>
+    <div class="strategy-info">
+      <h2>QQQ / VOO &mdash; Covered Calls (Long-Term Holdings)</h2>
+      <p>Covered call income strategy on QQQ and VOO once sufficient shares are accumulated. Cleaner underlying, tighter spreads, more predictable IV vs leveraged ETFs.</p>
+      <div class="strategy-meta">
+        <span class="tag tag-blue">Covered Call</span>
+        <span class="tag tag-green">Index ETF</span>
+        <span class="soon-badge">Coming Soon</span>
+      </div>
+    </div>
+    <div class="arrow">&#8250;</div>
+  </a>
+
+</div>
+
+<div class="footer">
+  <p>&#9888;&#65039; Educational reference only &mdash; not financial advice.<br>Options trading involves significant risk of loss. Consult a licensed financial advisor before trading.</p>
+</div>
+
+</body>
+</html>

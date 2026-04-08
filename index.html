@@ -24,13 +24,10 @@
   .tag-blue { background: #1a2a3a; color: #63b3ed; }
   .tag-green { background: #1a3a2a; color: #68d391; }
   .tag-yellow { background: #3a2f1a; color: #f6ad55; }
+  .tag-red { background: #3a1a1a; color: #fc8181; }
   .tag-purple { background: #2a1a3a; color: #b794f4; }
   .arrow { color: #4a5568; font-size: 1.2rem; flex-shrink: 0; margin-top: 18px; transition: color 0.2s; }
   .strategy-card:hover .arrow { color: #63b3ed; }
-  .coming-soon { opacity: 0.5; cursor: default; }
-  .coming-soon:hover { border-color: #2d3748; background: #1a1f2e; }
-  .coming-soon:hover .arrow { color: #4a5568; }
-  .soon-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 600; background: #2d3748; color: #718096; }
   .divider { border: none; border-top: 1px solid #2d3748; margin: 8px 0 20px; }
   .footer { text-align: center; padding: 32px 16px; }
   .footer p { font-size: 0.72rem; color: #4a5568; line-height: 1.6; }
@@ -45,7 +42,39 @@
 
 <div class="container">
 
-  <div class="section-label">Put Selling Strategies</div>
+  <div class="section-label">Reference Guides</div>
+
+  <a class="strategy-card" href="allocation_calculator.html">
+    <div class="strategy-icon">&#129518;</div>
+    <div class="strategy-info">
+      <h2>Capital Allocation Calculator &mdash; SPY &amp; QQQ</h2>
+      <p>Enter your total capital and instantly see how much goes into each bucket: SPY Core, QQQ Core, SPY Wheel, QQQ Wheel, SPY BPS, and QQQ BPS. Includes estimated monthly income and adjustable sliders.</p>
+      <div class="strategy-meta">
+        <span class="tag tag-green">Auto-Calculate</span>
+        <span class="tag tag-blue">Core + Wheel + BPS</span>
+        <span class="tag tag-yellow">Income Estimate</span>
+      </div>
+    </div>
+    <div class="arrow">&#8250;</div>
+  </a>
+
+  <a class="strategy-card" href="strike_selection.html">
+    <div class="strategy-icon">&#127919;</div>
+    <div class="strategy-info">
+      <h2>Strike Selection Reference &mdash; SPY &amp; QQQ</h2>
+      <p>Complete strike criteria for all six strategy combinations: SPY and QQQ covered calls (Core + Wheel buckets), sell puts, and bull put spreads. Includes VIX adjustments, macro blackout calendar, and one-line decision rules.</p>
+      <div class="strategy-meta">
+        <span class="tag tag-blue">Covered Call</span>
+        <span class="tag tag-yellow">Sell Put</span>
+        <span class="tag tag-red">Bull Put Spread</span>
+        <span class="tag tag-green">SPY + QQQ</span>
+      </div>
+    </div>
+    <div class="arrow">&#8250;</div>
+  </a>
+
+  <hr class="divider">
+  <div class="section-label">Strategy Playbooks</div>
 
   <a class="strategy-card" href="spy_options_strategy_v2.html">
     <div class="strategy-icon">&#128202;</div>
@@ -56,15 +85,12 @@
         <span class="tag tag-blue">Cash-Secured Put</span>
         <span class="tag tag-blue">Bull Put Spread</span>
         <span class="tag tag-green">The Wheel</span>
-        <span class="tag tag-yellow">SPY ~$655</span>
+        <span class="tag tag-yellow">SPY ~$555</span>
         <span class="tag tag-yellow">VIX ~24</span>
       </div>
     </div>
     <div class="arrow">&#8250;</div>
   </a>
-
-  <hr class="divider">
-  <div class="section-label">Covered Call Strategies</div>
 
   <a class="strategy-card" href="tqqq_covered_call.html">
     <div class="strategy-icon">&#128200;</div>
@@ -77,52 +103,6 @@
         <span class="tag tag-purple">3&times; Leveraged ETF</span>
         <span class="tag tag-yellow">TQQQ ~$43.80</span>
         <span class="tag tag-yellow">600 Shares</span>
-      </div>
-    </div>
-    <div class="arrow">&#8250;</div>
-  </a>
-
-  <a class="strategy-card coming-soon" href="#">
-    <div class="strategy-icon">&#127381;</div>
-    <div class="strategy-info">
-      <h2>USAR &mdash; Covered Calls (US Oil &amp; Gas ETF)</h2>
-      <p>Covered call income strategy on USAR. Commodity-linked, macro-sensitive. Adjusted for oil price events and OPEC calendar.</p>
-      <div class="strategy-meta">
-        <span class="tag tag-blue">Covered Call</span>
-        <span class="tag tag-yellow">Energy Sector</span>
-        <span class="soon-badge">Coming Soon</span>
-      </div>
-    </div>
-    <div class="arrow">&#8250;</div>
-  </a>
-
-  <a class="strategy-card coming-soon" href="#">
-    <div class="strategy-icon">&#9762;&#65039;</div>
-    <div class="strategy-info">
-      <h2>UUUU &mdash; Covered Calls (Energy Fuels / Uranium)</h2>
-      <p>Covered call income on UUUU uranium miner. High IV, high volatility. Conservative delta approach given gap risk on uranium sector news.</p>
-      <div class="strategy-meta">
-        <span class="tag tag-blue">Covered Call</span>
-        <span class="tag tag-yellow">Uranium / Mining</span>
-        <span class="tag tag-purple">High IV</span>
-        <span class="soon-badge">Coming Soon</span>
-      </div>
-    </div>
-    <div class="arrow">&#8250;</div>
-  </a>
-
-  <hr class="divider">
-  <div class="section-label">Planned Strategies</div>
-
-  <a class="strategy-card coming-soon" href="#">
-    <div class="strategy-icon">&#127959;&#65039;</div>
-    <div class="strategy-info">
-      <h2>QQQ / VOO &mdash; Covered Calls (Long-Term Holdings)</h2>
-      <p>Covered call income strategy on QQQ and VOO once sufficient shares are accumulated. Cleaner underlying, tighter spreads, more predictable IV vs leveraged ETFs.</p>
-      <div class="strategy-meta">
-        <span class="tag tag-blue">Covered Call</span>
-        <span class="tag tag-green">Index ETF</span>
-        <span class="soon-badge">Coming Soon</span>
       </div>
     </div>
     <div class="arrow">&#8250;</div>

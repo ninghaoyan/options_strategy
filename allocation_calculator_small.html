@@ -218,35 +218,69 @@
 
   <!-- INCOME ESTIMATE -->
   <div class="card">
-    <h2>&#128176; Estimated Monthly Income</h2>
-    <p style="font-size:0.77rem; color:#718096; margin-bottom:14px;">BPS income only at this fund size. Reinvest all premium into Core shares.</p>
+    <h2>&#128176; Monthly Income Calculator</h2>
+    <p style="font-size:0.77rem; color:#718096; margin-bottom:4px;">Enter the <strong>actual net credit per spread</strong> from your broker's live options chain. The calculator will use your real numbers instead of estimates.</p>
+    <p style="font-size:0.72rem; color:#4a5568; margin-bottom:16px;">How to find it: Open options chain &rarr; find your strike (delta 0.15&ndash;0.20) &rarr; buy protection leg ($15 below) &rarr; read the net credit shown.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+      <div>
+        <div style="font-size:0.72rem; font-weight:700; color:#63b3ed; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">SPY BPS &mdash; Net Credit / Spread</div>
+        <div style="position:relative;">
+          <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#63b3ed; font-weight:700; font-size:0.85rem; pointer-events:none;">$</span>
+          <input type="number" id="spyPremium" placeholder="e.g. 3.50" min="0" step="0.05"
+            style="background:#252d3d; border:1px solid #4a5568; border-radius:8px; color:#e2e8f0; font-size:0.95rem; font-weight:700; padding:9px 12px 9px 24px; width:100%; outline:none;"
+            oninput="updateIncome(); saveSettings();" />
+        </div>
+        <div style="font-size:0.7rem; color:#4a5568; margin-top:4px;">Per spread &times; 100 = premium per contract</div>
+      </div>
+      <div>
+        <div style="font-size:0.72rem; font-weight:700; color:#b794f4; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">QQQ BPS &mdash; Net Credit / Spread</div>
+        <div style="position:relative;">
+          <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#b794f4; font-weight:700; font-size:0.85rem; pointer-events:none;">$</span>
+          <input type="number" id="qqqPremium" placeholder="e.g. 4.00" min="0" step="0.05"
+            style="background:#252d3d; border:1px solid #4a5568; border-radius:8px; color:#e2e8f0; font-size:0.95rem; font-weight:700; padding:9px 12px 9px 24px; width:100%; outline:none;"
+            oninput="updateIncome(); saveSettings();" />
+        </div>
+        <div style="font-size:0.7rem; color:#4a5568; margin-top:4px;">Per spread &times; 100 = premium per contract</div>
+      </div>
+    </div>
+
     <table>
       <tr>
         <th>Source</th>
-        <th>Capital</th>
-        <th>Est. Monthly (Low)</th>
-        <th>Est. Monthly (High)</th>
+        <th>Spreads</th>
+        <th>Net Credit / Spread</th>
+        <th>Monthly Income</th>
       </tr>
       <tr>
         <td>SPY BPS</td>
-        <td id="incSpyBpsCap">—</td>
-        <td id="incSpyBpsLo">—</td>
-        <td id="incSpyBpsHi">—</td>
+        <td id="incSpySpreads">—</td>
+        <td id="incSpyCredit">—</td>
+        <td id="incSpyTotal" style="font-weight:600; color:#63b3ed;">—</td>
       </tr>
       <tr>
         <td>QQQ BPS</td>
-        <td id="incQqqBpsCap">—</td>
-        <td id="incQqqBpsLo">—</td>
-        <td id="incQqqBpsHi">—</td>
+        <td id="incQqqSpreads">—</td>
+        <td id="incQqqCredit">—</td>
+        <td id="incQqqTotal" style="font-weight:600; color:#b794f4;">—</td>
       </tr>
       <tr class="total-row">
-        <td><strong>Total estimated</strong></td>
-        <td id="incTotalCap">—</td>
-        <td id="incTotalLo">—</td>
-        <td id="incTotalHi">—</td>
+        <td><strong>Total per cycle</strong></td>
+        <td id="incTotalSpreads">—</td>
+        <td>—</td>
+        <td id="incGrandTotal">—</td>
       </tr>
     </table>
-    <p style="margin-top:10px; font-size:0.72rem; color:#718096;">&#9888; Reinvest all BPS premium into Core shares &mdash; compounding accelerates every cycle.</p>
+
+    <div style="background:#252d3d; border-radius:8px; padding:12px; margin-top:14px;">
+      <div style="font-size:0.72rem; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Annualised Estimate</div>
+      <div style="display:flex; gap:20px; flex-wrap:wrap;">
+        <div><div style="font-size:0.7rem; color:#718096;">8 cycles/year (50% rule avg)</div><div style="font-size:1rem; font-weight:700; color:#68d391;" id="annualLo">—</div></div>
+        <div><div style="font-size:0.7rem; color:#718096;">10 cycles/year (fast market)</div><div style="font-size:1rem; font-weight:700; color:#68d391;" id="annualHi">—</div></div>
+      </div>
+    </div>
+
+    <p style="margin-top:12px; font-size:0.72rem; color:#4a5568;">&#9888; Enter your live chain premiums for accurate figures. Leave blank to hide the estimate. Reinvest all income into Core shares.</p>
   </div>
 
   <!-- RATIONALE -->
@@ -269,11 +303,12 @@ Core (80%):  $92,266
   QQQ Core:  $41,520  &rarr; ~88 shares of QQQ
 
 BPS (20%):   $23,067
-  SPY BPS:   $12,687  &rarr; ~8 spreads  (~$240&ndash;320/month)
-  QQQ BPS:   $10,380  &rarr; ~6 spreads  (~$210&ndash;270/month)
-  Combined income: ~$450&ndash;590/month ✅
+  SPY BPS:   $12,687  &rarr; ~8 spreads
+  QQQ BPS:   $10,380  &rarr; ~6 spreads
 
-No Wheel needed &mdash; BPS handles the income side.</div>
+Enter your live net credit above to calculate actual income.
+At VIX ~24 a $15-wide BPS typically earns $2.50&ndash;4.00/spread &mdash;
+but always verify on your broker chain before trading.</div>
   </div>
 
   <div class="disclaimer">
@@ -291,10 +326,12 @@ No Wheel needed &mdash; BPS handles the income side.</div>
   function saveSettings() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        capital: document.getElementById('totalCapital').value,
-        spyQqq:  document.getElementById('spyQqqSlider').value,
-        core:    document.getElementById('coreSlider').value,
-        bps:     document.getElementById('bpsSlider').value,
+        capital:    document.getElementById('totalCapital').value,
+        spyQqq:     document.getElementById('spyQqqSlider').value,
+        core:       document.getElementById('coreSlider').value,
+        bps:        document.getElementById('bpsSlider').value,
+        spyPremium: document.getElementById('spyPremium').value,
+        qqqPremium: document.getElementById('qqqPremium').value,
       }));
       showSaved('&#10003; Saved');
     } catch(e) {}
@@ -312,10 +349,12 @@ No Wheel needed &mdash; BPS handles the income side.</div>
     try {
       const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
       if (!s) return false;
-      if (s.capital) document.getElementById('totalCapital').value = s.capital;
-      if (s.spyQqq)  document.getElementById('spyQqqSlider').value = s.spyQqq;
-      if (s.core)    document.getElementById('coreSlider').value   = s.core;
-      if (s.bps)     document.getElementById('bpsSlider').value    = s.bps;
+      if (s.capital)    document.getElementById('totalCapital').value = s.capital;
+      if (s.spyQqq)     document.getElementById('spyQqqSlider').value = s.spyQqq;
+      if (s.core)       document.getElementById('coreSlider').value   = s.core;
+      if (s.bps)        document.getElementById('bpsSlider').value    = s.bps;
+      if (s.spyPremium) document.getElementById('spyPremium').value   = s.spyPremium;
+      if (s.qqqPremium) document.getElementById('qqqPremium').value   = s.qqqPremium;
       return true;
     } catch(e) { return false; }
   }
@@ -397,19 +436,8 @@ No Wheel needed &mdash; BPS handles the income side.</div>
     document.getElementById('barBpsSpy').textContent  = (bpsPct  * spyR * 100) >= 8 ? 'SPY BPS'  : '';
     document.getElementById('barBpsQqq').textContent  = (bpsPct  * qqqR * 100) >= 8 ? 'QQQ BPS'  : '';
 
-    // Income
-    const spyBpsLo = spySpreads * 300, spyBpsHi = spySpreads * 400;
-    const qqqBpsLo = qqqSpreads * 350, qqqBpsHi = qqqSpreads * 450;
-    const fi = (n) => e ? '—' : '$' + n.toLocaleString();
-    document.getElementById('incSpyBpsCap').textContent = e ? '—' : fmt(spyBpsAmt);
-    document.getElementById('incSpyBpsLo').textContent  = fi(spyBpsLo);
-    document.getElementById('incSpyBpsHi').textContent  = fi(spyBpsHi);
-    document.getElementById('incQqqBpsCap').textContent = e ? '—' : fmt(qqqBpsAmt);
-    document.getElementById('incQqqBpsLo').textContent  = fi(qqqBpsLo);
-    document.getElementById('incQqqBpsHi').textContent  = fi(qqqBpsHi);
-    document.getElementById('incTotalCap').textContent  = e ? '—' : fmt(spyBpsAmt + qqqBpsAmt);
-    document.getElementById('incTotalLo').textContent   = fi(spyBpsLo + qqqBpsLo);
-    document.getElementById('incTotalHi').textContent   = fi(spyBpsHi + qqqBpsHi);
+    // Income — uses manual premium inputs
+    updateIncome();
 
     // Upgrade banner
     if (!e) {
@@ -424,6 +452,42 @@ No Wheel needed &mdash; BPS handles the income side.</div>
     } else {
       document.getElementById('upgradeBanner').innerHTML = 'Enter your capital to see when you can upgrade to the full 3-bucket strategy.';
     }
+  }
+
+  function updateIncome() {
+    const totalRaw  = parseFloat(document.getElementById('totalCapital').value);
+    const total     = isNaN(totalRaw) || totalRaw <= 0 ? 0 : totalRaw;
+    const bpsPct    = parseInt(document.getElementById('bpsSlider').value) / 100;
+    const spyR      = parseInt(document.getElementById('spyQqqSlider').value) / 100;
+    const qqqR      = 1 - spyR;
+    const spyBpsAmt = total * bpsPct * spyR;
+    const qqqBpsAmt = total * bpsPct * qqqR;
+    const spySpreads = Math.floor(spyBpsAmt / 1500);
+    const qqqSpreads = Math.floor(qqqBpsAmt / 1500);
+
+    const spyPrem = parseFloat(document.getElementById('spyPremium').value);
+    const qqqPrem = parseFloat(document.getElementById('qqqPremium').value);
+    const hasSpy  = !isNaN(spyPrem) && spyPrem > 0;
+    const hasQqq  = !isNaN(qqqPrem) && qqqPrem > 0;
+
+    document.getElementById('incSpySpreads').textContent = total > 0 ? spySpreads : '—';
+    document.getElementById('incQqqSpreads').textContent = total > 0 ? qqqSpreads : '—';
+    document.getElementById('incTotalSpreads').textContent = total > 0 ? (spySpreads + qqqSpreads) : '—';
+
+    document.getElementById('incSpyCredit').textContent  = hasSpy ? '$' + spyPrem.toFixed(2) : '— enter above';
+    document.getElementById('incQqqCredit').textContent  = hasQqq ? '$' + qqqPrem.toFixed(2) : '— enter above';
+
+    const spyIncome = hasSpy && total > 0 ? spySpreads * spyPrem * 100 : null;
+    const qqqIncome = hasQqq && total > 0 ? qqqSpreads * qqqPrem * 100 : null;
+    const totalIncome = (spyIncome !== null || qqqIncome !== null)
+      ? (spyIncome || 0) + (qqqIncome || 0) : null;
+
+    document.getElementById('incSpyTotal').textContent  = spyIncome  !== null ? '$' + Math.round(spyIncome).toLocaleString()  : '—';
+    document.getElementById('incQqqTotal').textContent  = qqqIncome  !== null ? '$' + Math.round(qqqIncome).toLocaleString()  : '—';
+    document.getElementById('incGrandTotal').textContent = totalIncome !== null ? '$' + Math.round(totalIncome).toLocaleString() : '—';
+
+    document.getElementById('annualLo').textContent = totalIncome !== null ? '$' + Math.round(totalIncome * 8).toLocaleString()  + '/yr' : '—';
+    document.getElementById('annualHi').textContent = totalIncome !== null ? '$' + Math.round(totalIncome * 10).toLocaleString() + '/yr' : '—';
   }
 
   document.getElementById('totalCapital').addEventListener('input', () => { update(); saveSettings(); });

@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strike Selection Reference — SPY &amp; QQQ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #1a1f2e, #252d3d); padding: 24px 20px; border-bottom: 1px solid #2d3748; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #718096; text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+  .back-link:hover { color: #63b3ed; }
+  header h1 { font-size: 1.4rem; font-weight: 700; color: #63b3ed; }
+  header p { font-size: 0.8rem; color: #718096; margin-top: 4px; }
+  .tabs { display: flex; overflow-x: auto; background: #1a1f2e; border-bottom: 1px solid #2d3748; padding: 0 12px; gap: 4px; }
+  .tab { padding: 12px 14px; font-size: 0.75rem; font-weight: 600; color: #718096; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; }
+  .tab.active { color: #63b3ed; border-bottom-color: #63b3ed; }
+  .tab:hover:not(.active) { color: #a0aec0; }
+  .content { display: none; padding: 16px; max-width: 800px; margin: 0 auto; }
+  .content.active { display: block; }
+  .card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+  .card h2 { font-size: 0.95rem; font-weight: 700; color: #63b3ed; margin-bottom: 12px; }
+  .card h3 { font-size: 0.82rem; font-weight: 600; color: #a0aec0; margin: 12px 0 8px; }
+  .card p, .card li { font-size: 0.8rem; color: #cbd5e0; line-height: 1.6; }
+  .card ul { padding-left: 16px; }
+  .card li { margin-bottom: 4px; }
+  .highlight { background: #252d3d; border-left: 3px solid #63b3ed; border-radius: 6px; padding: 12px; margin: 10px 0; font-size: 0.78rem; color: #e2e8f0; font-family: monospace; line-height: 1.8; white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.77rem; }
+  th { background: #252d3d; color: #63b3ed; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { padding: 8px 10px; border-bottom: 1px solid #2d3748; color: #cbd5e0; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #252d3d; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+  .badge-green { background: #1a3a2a; color: #68d391; }
+  .badge-yellow { background: #3a2f1a; color: #f6ad55; }
+  .badge-red { background: #3a1a1a; color: #fc8181; }
+  .badge-blue { background: #1a2a3a; color: #63b3ed; }
+  .badge-purple { background: #2a1a3a; color: #b794f4; }
+  .decision-node { background: #252d3d; border-radius: 8px; padding: 12px; margin: 8px 0; border-left: 3px solid #4a5568; }
+  .decision-node.green { border-left-color: #68d391; }
+  .decision-node.yellow { border-left-color: #f6ad55; }
+  .decision-node.red { border-left-color: #fc8181; }
+  .decision-node .label { font-size: 0.72rem; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .decision-node .action { font-size: 0.8rem; color: #e2e8f0; line-height: 1.6; }
+  .rule-box { display: flex; align-items: flex-start; gap: 10px; background: #252d3d; border-radius: 8px; padding: 12px; margin: 8px 0; }
+  .rule-num { background: #63b3ed; color: #0f1117; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+  .rule-text { font-size: 0.8rem; color: #cbd5e0; line-height: 1.5; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 520px) { .two-col { grid-template-columns: 1fr; } }
+  .bucket-card { background: #252d3d; border-radius: 8px; padding: 14px; border-top: 3px solid #4a5568; }
+  .bucket-card.core { border-top-color: #68d391; }
+  .bucket-card.wheel { border-top-color: #f6ad55; }
+  .bucket-card h4 { font-size: 0.84rem; font-weight: 700; margin-bottom: 6px; }
+  .bucket-card.core h4 { color: #68d391; }
+  .bucket-card.wheel h4 { color: #f6ad55; }
+  .bucket-card p { font-size: 0.77rem; color: #a0aec0; line-height: 1.6; }
+  .bucket-tag { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .bucket-card.core .bucket-tag { color: #68d391; }
+  .bucket-card.wheel .bucket-tag { color: #f6ad55; }
+  .quote { background: #1e2a1e; border: 1px solid #2d4a2d; border-radius: 8px; padding: 14px; margin: 10px 0; }
+  .quote p { font-size: 0.82rem; color: #68d391; font-style: italic; line-height: 1.6; }
+  .vix-bar { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+  .vix-label { font-size: 0.75rem; color: #a0aec0; width: 160px; flex-shrink: 0; }
+  .vix-track { flex: 1; height: 8px; background: #2d3748; border-radius: 4px; overflow: hidden; }
+  .vix-fill { height: 100%; border-radius: 4px; }
+  .vix-value { font-size: 0.75rem; color: #e2e8f0; width: 80px; text-align: right; }
+  .strategy-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .strategy-badge { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .sb-spy { background: #1a2a3a; color: #63b3ed; }
+  .sb-qqq { background: #2a1a3a; color: #b794f4; }
+  .sb-cc { background: #1a3a2a; color: #68d391; }
+  .sb-put { background: #3a2f1a; color: #f6ad55; }
+  .sb-bps { background: #3a1a1a; color: #fc8181; }
+  .disclaimer { background: #2d2000; border: 1px solid #744210; border-radius: 8px; padding: 12px; margin-top: 16px; }
+  .disclaimer p { font-size: 0.75rem; color: #f6ad55; line-height: 1.5; }
+  .divider { border: none; border-top: 1px solid #2d3748; margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="index.html">&#8592; Back to Strategy Hub</a>
+  <h1>&#127919; Strike Selection Reference</h1>
+  <p>SPY &amp; QQQ &mdash; Covered Call &middot; Sell Put &middot; Bull Put Spread</p>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('overview', this)">Overview</div>
+  <div class="tab" onclick="showTab('spy-cc', this)">SPY &mdash; CC</div>
+  <div class="tab" onclick="showTab('spy-put', this)">SPY &mdash; Sell Put</div>
+  <div class="tab" onclick="showTab('spy-bps', this)">SPY &mdash; BPS</div>
+  <div class="tab" onclick="showTab('qqq-cc', this)">QQQ &mdash; CC</div>
+  <div class="tab" onclick="showTab('qqq-put', this)">QQQ &mdash; Sell Put</div>
+  <div class="tab" onclick="showTab('qqq-bps', this)">QQQ &mdash; BPS</div>
+  <div class="tab" onclick="showTab('summary', this)">Summary</div>
+</div>
+
+<!-- OVERVIEW -->
+<div id="overview" class="content active">
+  <div class="card">
+    <h2>&#128218; How to Use This Reference</h2>
+    <p style="margin-bottom:12px;">This page covers strike selection for six strategy/ticker combinations. Each tab gives you the full criteria for one strategy. Use the Summary tab for a quick side-by-side comparison.</p>
+    <table>
+      <tr><th>Tab</th><th>Strategy</th><th>Purpose</th></tr>
+      <tr><td><span class="badge badge-blue">SPY &mdash; CC</span></td><td>Covered Call on SPY</td><td>Income on held shares (Core + Wheel buckets)</td></tr>
+      <tr><td><span class="badge badge-yellow">SPY &mdash; Sell Put</span></td><td>Cash-Secured / Naked Put on SPY</td><td>Income + disciplined dip buying</td></tr>
+      <tr><td><span class="badge badge-red">SPY &mdash; BPS</span></td><td>Bull Put Spread on SPY</td><td>Defined-risk income alongside share holdings</td></tr>
+      <tr><td><span class="badge badge-purple">QQQ &mdash; CC</span></td><td>Covered Call on QQQ</td><td>Income on held shares (Core + Wheel buckets)</td></tr>
+      <tr><td><span class="badge badge-yellow">QQQ &mdash; Sell Put</span></td><td>Cash-Secured / Naked Put on QQQ</td><td>Income + disciplined Nasdaq dip buying</td></tr>
+      <tr><td><span class="badge badge-red">QQQ &mdash; BPS</span></td><td>Bull Put Spread on QQQ</td><td>Defined-risk income alongside share holdings</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>&#9888;&#65039; Universal Rules — Apply to Every Strategy Below</h2>
+    <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>DTE: Always enter at 45 days.</strong> Not 30, not 21. You need the full runway before the 21 DTE hard-close trigger.</div></div>
+    <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>GTC at 50% profit — set immediately on entry.</strong> Every single trade, without exception. This is your auto-pilot profit-take.</div></div>
+    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>21 DTE hard close — no exceptions.</strong> Close or roll at 21 DTE regardless of profit or loss. Gamma dominates inside this window.</div></div>
+    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>Stop loss at 2&times; premium collected.</strong> Collected $3.00 &rarr; close if position costs $9.00 to exit. Never let losses run past this.</div></div>
+    <div class="rule-box"><div class="rule-num">5</div><div class="rule-text"><strong>VIX &gt; 35 &rarr; pause ALL new positions.</strong> No SPY, no QQQ, no CC, no puts, no BPS. Market dislocation — wait for calm.</div></div>
+    <div class="rule-box"><div class="rule-num">6</div><div class="rule-text"><strong>No new positions the week before Fed, CPI, or major earnings.</strong> QQQ strategies: also avoid big-tech earnings weeks (AAPL, MSFT, NVDA, META, AMZN, GOOGL).</div></div>
+  </div>
+
+  <div class="card">
+    <h2>&#128202; SPY vs QQQ — Key Differences</h2>
+    <table>
+      <tr><th>Factor</th><th>SPY (S&amp;P 500)</th><th>QQQ (Nasdaq-100)</th></tr>
+      <tr><td>Typical daily move</td><td>0.5–1%</td><td>0.8–1.5%</td></tr>
+      <tr><td>Implied volatility</td><td>Moderate</td><td>Higher &rarr; more premium</td></tr>
+      <tr><td>Gap risk</td><td>Lower</td><td>Higher (tech-driven)</td></tr>
+      <tr><td>Options liquidity</td><td>Best in world</td><td>Excellent, second to SPY</td></tr>
+      <tr><td>Strike increments</td><td>$1 wide</td><td>$1 wide</td></tr>
+      <tr><td>Macro sensitivity</td><td>Broad economy</td><td>Tech earnings &amp; rates</td></tr>
+      <tr><td>OTM% needed</td><td>Standard</td><td>+2–3% wider than SPY</td></tr>
+      <tr><td>CC macro blackout</td><td>Fed, CPI</td><td>Fed, CPI + big tech earnings</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- SPY CC -->
+<div id="spy-cc" class="content">
+  <div class="card">
+    <div class="strategy-header">
+      <span class="strategy-badge sb-spy">SPY</span>
+      <span class="strategy-badge sb-cc">Covered Call</span>
+    </div>
+    <h2>&#128308; The Core Tension</h2>
+    <p style="margin-bottom:10px;">Covered calls on SPY have one fundamental conflict: you want to hold SPY long-term, but a call caps your upside and can force you to sell. The two-bucket system resolves this.</p>
+    <div class="two-col">
+      <div class="bucket-card core">
+        <div class="bucket-tag">Core Bucket</div>
+        <h4>&#127956;&#65039; Long-Term Hold</h4>
+        <p>Shares you intend to hold for years. Sell calls here very conservatively — or not at all. Upside preservation is the priority.</p>
+      </div>
+      <div class="bucket-card wheel">
+        <div class="bucket-tag">Wheel Bucket</div>
+        <h4>&#128260; Active Income</h4>
+        <p>Shares you are OK selling if called away. Assignment here is a success — cash feeds back into the sell put / BPS cycle.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#127919; Core Bucket — Strike Criteria</h2>
+    <div class="highlight">Goal: Minimal income, maximum upside preservation
+If ANY doubt about losing these shares &rarr; go higher or skip
+
+Delta:        0.10&ndash;0.15
+OTM%:         12&ndash;15% above current SPY price
+DTE:          45 days
+Strike floor: Must feel comfortable even if SPY runs 20%+ above it
+
+VIX adjustment:
+  VIX &lt;18   &rarr; 12% OTM minimum
+  VIX 18&ndash;25 &rarr; 15% OTM minimum
+  VIX &gt;25   &rarr; Skip &mdash; vol is elevated, don't risk assignment
+
+GTC:          50% profit &mdash; set immediately
+21 DTE:       Hard close
+Assignment:   Do NOT auto-resell CC if called away
+              Re-evaluate &mdash; rebuild core position first</div>
+
+    <h3>Example (SPY $555, VIX ~20)</h3>
+    <div class="highlight">12% OTM &rarr; $555 &times; 1.12 = $621 strike minimum
+Delta check:  should be ~0.12&ndash;0.14
+Premium:      ~$0.80&ndash;1.20/contract (intentionally small)
+GTC:          set at $0.40&ndash;0.60 (50%)
+
+One-line test: "Would I regret losing these shares at $621?"
+               If ANY doubt &rarr; go to $640+ or skip entirely</div>
+  </div>
+
+  <div class="card">
+    <h2>&#127919; Wheel Bucket — Strike Criteria</h2>
+    <div class="highlight">Goal: Maximise premium, assignment is welcome and expected
+Assignment feeds cash back into sell put / BPS cycle
+
+Delta:        0.20&ndash;0.25
+OTM%:         8&ndash;12% above current SPY price
+DTE:          45 days
+Strike floor: Must be ABOVE your cost basis on these shares
+
+VIX adjustment:
+  VIX &lt;18   &rarr; 8% OTM
+  VIX 18&ndash;25 &rarr; 10% OTM
+  VIX 25&ndash;35 &rarr; 12% OTM (widen, don't tighten)
+  VIX &gt;35   &rarr; Pause all new CC positions
+
+GTC:          50% profit &mdash; set immediately
+21 DTE:       Hard close
+Stop loss:    Buy back if loss = 2&times; premium collected
+Assignment:   Success &rarr; cash returns to sell put / BPS cycle</div>
+
+    <h3>Example (SPY $555, VIX ~20)</h3>
+    <div class="highlight">10% OTM &rarr; $555 &times; 1.10 = $610 strike
+Delta check:  should be ~0.20&ndash;0.22
+Premium:      ~$2.50&ndash;3.50/contract
+GTC:          set at $1.25&ndash;1.75 (50%)
+
+One-line test: "Am I genuinely happy selling these shares at $610?"
+               If yes &rarr; sell. Assignment here = Wheel working.</div>
+
+    <div class="quote">
+      <p>"Wheel bucket assignment is not a failure &mdash; it's the cycle completing. Cash out, sell a put, get assigned back in lower, repeat."</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#128201; VIX Visual Guide &mdash; SPY CC OTM%</h2>
+    <div class="vix-bar">
+      <div class="vix-label">VIX &lt;18 (Core: 12%)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:30%; background:#68d391;"></div></div>
+      <div class="vix-value">Wheel: 8%</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">VIX 18&ndash;25 (Core: 15%)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:55%; background:#f6ad55;"></div></div>
+      <div class="vix-value">Wheel: 10%</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">VIX 25&ndash;35 (Core: skip)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:80%; background:#fc8181;"></div></div>
+      <div class="vix-value">Wheel: 12%</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">VIX &gt;35 (both: pause)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:100%; background:#742a2a;"></div></div>
+      <div class="vix-value">No CCs</div>
+    </div>
+  </div>
+</div>
+
+<!-- SPY SELL PUT -->
+<div id="spy-put" class="content">
+  <div class="card">
+    <div class="strategy-header">
+      <span class="strategy-badge sb-spy">SPY</span>
+      <span class="strategy-badge sb-put">Sell Put</span>
+    </div>
+    <h2>&#127919; Strike Criteria</h2>
+    <div class="highlight">Goal: Income generation + disciplined dip buying
+      The strike IS your target buy price for SPY shares
+
+Delta:        0.15&ndash;0.20 (short put)
+OTM%:         See VIX table below
+DTE:          45 days
+Strike floor: A price you genuinely want to own 100 SPY shares at
+              This is your dip-buying discipline &mdash; not just a number
+
+VIX adjustment:
+  VIX &lt;18   &rarr; 5&ndash;7% below SPY
+  VIX 18&ndash;25 &rarr; 8&ndash;10% below SPY  (current conditions)
+  VIX 25&ndash;35 &rarr; 10&ndash;12% below SPY
+  VIX &gt;35   &rarr; Pause &mdash; no new put positions
+
+GTC:          50% profit &mdash; set immediately on entry
+21 DTE:       Hard close or roll &mdash; no exceptions
+Stop loss:    Close if loss = 2&times; premium collected
+Assignment:   100 SPY shares &rarr; decide bucket placement:
+              Bought at real dip? &rarr; Core bucket
+              Fair value entry?   &rarr; Wheel bucket</div>
+
+    <h3>Example (SPY $555, VIX ~22)</h3>
+    <div class="highlight">9% OTM &rarr; $555 &times; 0.91 = $505 strike
+Delta check:  should be ~0.17&ndash;0.20
+Premium:      ~$4.00&ndash;5.50/contract
+GTC:          set at $2.00&ndash;2.75 (50%)
+Effective buy price if assigned: $505 &ndash; $4.50 = $500.50
+
+One-line test: "Would I happily own 100 more SPY at $505?"
+               If yes &rarr; sell this put.</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128260; The Dual Purpose of Put Selling</h2>
+    <div class="highlight">Your sell put strategy serves TWO goals simultaneously:
+
+Goal 1 &mdash; Income (primary):
+  SPY stays above $505 &rarr; premium decays &rarr; GTC fires
+  Pocket income, redeploy, repeat ✅
+
+Goal 2 &mdash; Dip buying (bonus):
+  Instead of waiting and guessing when to buy the dip:
+  &rarr; Sell put at your target dip price ($505)
+  &rarr; If SPY falls there &rarr; assigned at your exact target
+  &rarr; Effective cost = $505 &ndash; premium = even cheaper ✅
+  &rarr; If SPY doesn't fall &rarr; kept premium as consolation ✅
+
+This eliminates the emotional "should I buy now?" question.
+You pre-commit to your buy price via the put strike.</div>
+
+    <div class="quote">
+      <p>"You're not trying to time the dip &mdash; you're getting paid to wait for it at a price you already decided you want."</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#128203; Assignment Decision — Which Bucket?</h2>
+    <table>
+      <tr><th>Scenario</th><th>Bucket</th><th>Next Action</th></tr>
+      <tr><td>Assigned at a genuine dip (SPY down 10%+)</td><td><span class="badge badge-green">Core</span></td><td>Hold long-term, no CC yet</td></tr>
+      <tr><td>Assigned at fair value (SPY down 5–8%)</td><td><span class="badge badge-yellow">Wheel</span></td><td>Sell covered call immediately</td></tr>
+      <tr><td>Assigned, SPY still falling</td><td><span class="badge badge-yellow">Wheel</span></td><td>Sell CC or wait for bounce</td></tr>
+      <tr><td>50% profit hit, not assigned</td><td>N/A</td><td>Close, sell new put next cycle</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>&#128201; VIX Visual Guide &mdash; SPY Put OTM%</h2>
+    <div class="vix-bar">
+      <div class="vix-label">VIX &lt;18 (Calm)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:25%; background:#68d391;"></div></div>
+      <div class="vix-value">5&ndash;7% OTM</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">VIX 18&ndash;25 &#9664; Now</div>
+      <div class="vix-track"><div class="vix-fill" style="width:55%; background:#f6ad55;"></div></div>
+      <div class="vix-value">8&ndash;10% OTM</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">VIX 25&ndash;35 (High)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:80%; background:#fc8181;"></div></div>
+      <div class="vix-value">10&ndash;12% OTM</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">VIX &gt;35 (Pause)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:100%; background:#742a2a;"></div></div>
+      <div class="vix-value">No new puts</div>
+    </div>
+  </div>
+</div>
+
+<!-- SPY BPS -->
+<div id="spy-bps" class="content">
+  <div class="card">
+    <div class="strategy-header">
+      <span class="strategy-badge sb-spy">SPY</span>
+      <span class="strategy-badge sb-bps">Bull Put Spread</span>
+    </div>
+    <h2>&#127919; What Makes BPS Different from Sell Put</h2>
+    <div class="two-col">
+      <div class="bucket-card core">
+        <div class="bucket-tag">Sell Put</div>
+        <h4>Full Capital Required</h4>
+        <p>Broker holds ~$55,500 as collateral per contract (full share price). High capital requirement.</p>
+      </div>
+      <div class="bucket-card wheel">
+        <div class="bucket-tag">BPS</div>
+        <h4>Spread Width Only</h4>
+        <p>Broker holds only the spread width as collateral. $15-wide BPS = $1,500 max collateral. Run alongside share holdings.</p>
+      </div>
+    </div>
+    <p style="margin-top:12px; font-size:0.8rem; color:#a0aec0;">BPS is your tool for when all capital is deployed in shares but you still want premium income. The defined max loss also removes the assignment risk entirely.</p>
+  </div>
+
+  <div class="card">
+    <h2>&#127919; Short Put (Income Leg) &mdash; Strike Criteria</h2>
+    <div class="highlight">This leg is identical to the Sell Put criteria above.
+The short put is your income source.
+
+Delta (short put): 0.15&ndash;0.20
+OTM%:
+  VIX &lt;18   &rarr; 5&ndash;7% below SPY
+  VIX 18&ndash;25 &rarr; 8&ndash;10% below SPY
+  VIX 25&ndash;35 &rarr; 10&ndash;12% below SPY
+  VIX &gt;35   &rarr; Pause
+DTE:               45 days
+Strike test:       "Would I want to own SPY at this price?"
+                   (Even though BPS can't assign, this keeps
+                    your strike discipline honest)</div>
+  </div>
+
+  <div class="card">
+    <h2>&#127919; Long Put (Protection Leg) &mdash; Strike Criteria</h2>
+    <div class="highlight">The long put caps your downside. Two approaches:
+
+Approach A &mdash; Fixed Width (Simpler, recommended):
+  Use $10&ndash;$15 spread width consistently
+  Short put at $505 &rarr; long put at $490&ndash;$495
+  Keeps position sizing consistent across trades
+
+Approach B &mdash; Key Support Level:
+  Look at SPY chart &rarr; find major support below short put
+  Place long put just below that support level
+  Logic: protection kicks in where market truly breaks down
+
+Target ROC (Return on Capital):
+  Net premium &divide; (spread width &times; 100) = 20&ndash;25%
+  If ROC &lt; 15% &rarr; spread too wide, find tighter width
+  If ROC &gt; 35% &rarr; short put too close, risk too high</div>
+
+    <h3>Example (SPY $555, VIX ~22)</h3>
+    <div class="highlight">Short put: $505 (9% OTM, delta ~0.18)
+Long put:  $490 ($15-wide spread)
+Capital:   $1,500 per spread
+Premium:   ~$3.00&ndash;4.00 net credit
+Max loss:  ($15 &times; 100) &ndash; $350 = $1,150
+ROC:       $350 &divide; $1,500 = 23% ✅
+
+GTC buy-back: $1.50&ndash;2.00 (50% of premium)
+Stop loss:    Close if spread costs 2&times; premium to exit
+              Sold for $3.50 &rarr; close if costs $10.50</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128680; BPS Stop Loss &mdash; "Never Let It Fulfill"</h2>
+    <div class="highlight">Three layers of protection &mdash; all three active simultaneously:
+
+Layer 1 &mdash; GTC 50% profit (auto-close on profit):
+  Set immediately on entry. Fires when premium halves.
+
+Layer 2 &mdash; 21 DTE hard close (calendar-based):
+  Set a reminder the day you open every trade.
+  Close at 21 DTE regardless of P&amp;L.
+
+Layer 3 &mdash; Stop loss at 2&times; premium (loss limit):
+  Collected $3.50 &rarr; close if spread costs $10.50 to exit.
+  Check manually if SPY drops sharply mid-trade.
+
+The only gap risk:
+  SPY gaps 5%+ overnight &rarr; stop loss may not fill cleanly
+  Solution: VIX &gt;35 &rarr; pause, no new BPS positions
+  SPY almost never gaps &gt;5% overnight in normal conditions</div>
+
+    <div class="decision-node yellow">
+      <div class="label">&#9888; Position Sizing Rule</div>
+      <div class="action">Never use more than 15&ndash;20% of total portfolio as BPS collateral. On a $100,000 portfolio &rarr; max $15,000&ndash;20,000 tied up in BPS. A worst-case month where all spreads hit stop loss should not materially damage your long-term compounding.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QQQ CC -->
+<div id="qqq-cc" class="content">
+  <div class="card">
+    <div class="strategy-header">
+      <span class="strategy-badge sb-qqq">QQQ</span>
+      <span class="strategy-badge sb-cc">Covered Call</span>
+    </div>
+    <h2>&#9888;&#65039; QQQ vs SPY for Covered Calls</h2>
+    <table>
+      <tr><th>Factor</th><th>SPY CC</th><th>QQQ CC</th></tr>
+      <tr><td>Underlying</td><td>S&amp;P 500 (broad)</td><td>Nasdaq-100 (tech-heavy)</td></tr>
+      <tr><td>IV level</td><td>Moderate</td><td>Higher &rarr; more premium for same delta</td></tr>
+      <tr><td>Strike OTM needed</td><td>8&ndash;15%</td><td>10&ndash;18% (wider for same safety)</td></tr>
+      <tr><td>Macro blackout</td><td>Fed, CPI</td><td>Fed, CPI + AAPL/MSFT/NVDA/META/AMZN/GOOGL earnings</td></tr>
+      <tr><td>Gap risk</td><td>Lower</td><td>Higher &mdash; single stock moves QQQ</td></tr>
+      <tr><td>Premium vs SPY</td><td>Base</td><td>~20&ndash;40% more for same OTM%</td></tr>
+    </table>
+    <p style="margin-top:10px; font-size:0.77rem; color:#718096;">The higher premium on QQQ is compensation for higher vol &mdash; not free money. You need wider strikes to maintain the same safety margin as SPY.</p>
+  </div>
+
+  <div class="card">
+    <h2>&#127919; Core Bucket &mdash; Strike Criteria</h2>
+    <div class="highlight">Goal: Minimal income, maximum upside preservation
+      QQQ can surge 15&ndash;20% in a month &mdash; go very wide
+
+Delta:        0.10&ndash;0.12 (more conservative than SPY core)
+OTM%:         15&ndash;18% above current QQQ price
+DTE:          45 days
+Strike floor: Must be above any near-term price target
+              you have for QQQ
+
+VIX adjustment:
+  VIX &lt;18   &rarr; 15% OTM minimum
+  VIX 18&ndash;25 &rarr; 18% OTM minimum
+  VIX &gt;25   &rarr; Skip entirely &mdash; QQQ vol too unpredictable
+
+Macro blackout: Never open the week before:
+  Fed meetings &middot; CPI &middot; AAPL, MSFT, NVDA, META, AMZN, GOOGL earnings
+
+GTC:          50% profit &mdash; set immediately
+21 DTE:       Hard close
+Assignment:   Do NOT auto-resell CC &mdash; rebuild core position first</div>
+
+    <h3>Example (QQQ $470, VIX ~20)</h3>
+    <div class="highlight">15% OTM &rarr; $470 &times; 1.15 = $540 strike minimum
+Delta check:  should be ~0.10&ndash;0.12
+Premium:      ~$1.00&ndash;1.50/contract (intentionally small)
+GTC:          set at $0.50&ndash;0.75 (50%)
+
+One-line test: "Would I regret losing QQQ at $540
+               if it then ran to $600?"
+               If ANY doubt &rarr; go higher or skip entirely.</div>
+  </div>
+
+  <div class="card">
+    <h2>&#127919; Wheel Bucket &mdash; Strike Criteria</h2>
+    <div class="highlight">Goal: Meaningful income, assignment acceptable and expected
+      QQQ's higher IV earns you more premium for same delta
+
+Delta:        0.20&ndash;0.25
+OTM%:         10&ndash;14% above current QQQ price
+DTE:          45 days
+Strike floor: Must be ABOVE cost basis on these shares
+
+VIX adjustment:
+  VIX &lt;18   &rarr; 10% OTM
+  VIX 18&ndash;25 &rarr; 12% OTM
+  VIX 25&ndash;35 &rarr; 14% OTM
+  VIX &gt;35   &rarr; Pause all new CC positions
+
+Macro blackout: Same as core &mdash; no new calls the week
+  before Fed, CPI, or any of the 6 big tech earnings
+
+GTC:          50% profit &mdash; set immediately
+21 DTE:       Hard close
+Stop loss:    Close if loss = 2&times; premium collected
+Assignment:   Success &rarr; cash returns to QQQ sell put / BPS</div>
+
+    <h3>Example (QQQ $470, VIX ~20)</h3>
+    <div class="highlight">12% OTM &rarr; $470 &times; 1.12 = $526 strike
+Delta check:  should be ~0.20&ndash;0.22
+Premium:      ~$3.50&ndash;5.00/contract (more than SPY equivalent)
+GTC:          set at $1.75&ndash;2.50 (50%)
+
+One-line test: "Am I genuinely happy selling QQQ at $526?"
+               Factor in: is there a major tech earnings
+               event before expiry that could spike QQQ?</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128197; QQQ Macro Blackout Calendar</h2>
+    <p style="margin-bottom:10px; font-size:0.8rem; color:#a0aec0;">These events can move QQQ 3–6%+ in a single session. Never open a new QQQ covered call in the 5 trading days before:</p>
+    <div class="rule-box"><div class="rule-num">!</div><div class="rule-text"><strong>Fed meetings &amp; rate decisions</strong> &mdash; rate-sensitive tech names dominate QQQ</div></div>
+    <div class="rule-box"><div class="rule-num">!</div><div class="rule-text"><strong>CPI / PCE inflation prints</strong> &mdash; directly impacts QQQ valuation via rate expectations</div></div>
+    <div class="rule-box"><div class="rule-num">!</div><div class="rule-text"><strong>AAPL, MSFT, NVDA, META, AMZN, GOOGL earnings</strong> &mdash; these 6 stocks are ~50% of QQQ. Any one can gap QQQ 2–4%.</div></div>
+  </div>
+</div>
+
+<!-- QQQ SELL PUT -->
+<div id="qqq-put" class="content">
+  <div class="card">
+    <div class="strategy-header">
+      <span class="strategy-badge sb-qqq">QQQ</span>
+      <span class="strategy-badge sb-put">Sell Put</span>
+    </div>
+    <h2>&#127919; Strike Criteria</h2>
+    <div class="highlight">Goal: Income + disciplined Nasdaq dip buying
+      Strike = your target buy price for QQQ shares
+
+Delta:        0.15&ndash;0.20 (short put)
+OTM%:         See VIX table below
+DTE:          45 days
+Strike floor: A price you genuinely want to own 100 QQQ shares at
+
+VIX adjustment:
+  VIX &lt;18   &rarr; 7&ndash;9% below QQQ  (slightly wider than SPY)
+  VIX 18&ndash;25 &rarr; 10&ndash;12% below QQQ
+  VIX 25&ndash;35 &rarr; 12&ndash;15% below QQQ
+  VIX &gt;35   &rarr; Pause &mdash; no new put positions
+
+Macro blackout: No new puts the week before:
+  Fed &middot; CPI &middot; AAPL, MSFT, NVDA, META, AMZN, GOOGL earnings
+  (A single earnings miss can gap QQQ 4% against you overnight)
+
+GTC:          50% profit &mdash; set immediately
+21 DTE:       Hard close or roll &mdash; no exceptions
+Stop loss:    Close if loss = 2&times; premium collected
+Assignment:   100 QQQ shares &rarr; decide bucket:
+              Real dip (&gt;10% down) &rarr; Core bucket
+              Fair value (5&ndash;8% down) &rarr; Wheel bucket</div>
+
+    <h3>Example (QQQ $470, VIX ~22)</h3>
+    <div class="highlight">11% OTM &rarr; $470 &times; 0.89 = $418 strike
+Delta check:  should be ~0.17&ndash;0.20
+Premium:      ~$5.00&ndash;7.00/contract (higher than SPY equivalent)
+GTC:          set at $2.50&ndash;3.50 (50%)
+Effective buy price if assigned: $418 &ndash; $6.00 = $412
+
+One-line test: "Would I happily own 100 QQQ at $418?"
+               Is there a major tech earnings event
+               before expiry? If yes &rarr; wait or go wider.</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128202; QQQ vs SPY Put Selling &mdash; Premium Comparison</h2>
+    <table>
+      <tr><th>Metric</th><th>SPY Put (9% OTM)</th><th>QQQ Put (11% OTM)</th></tr>
+      <tr><td>Underlying price</td><td>~$555</td><td>~$470</td></tr>
+      <tr><td>Strike</td><td>~$505</td><td>~$418</td></tr>
+      <tr><td>Est. premium</td><td>~$4.00&ndash;5.50</td><td>~$5.00&ndash;7.00</td></tr>
+      <tr><td>Capital if assigned</td><td>~$50,500</td><td>~$41,800</td></tr>
+      <tr><td>ROC on premium</td><td>~0.8&ndash;1.0%</td><td>~1.2&ndash;1.7%</td></tr>
+      <tr><td>Gap risk</td><td>Lower</td><td>Higher (tech events)</td></tr>
+      <tr><td>Macro sensitivity</td><td>Broad economy</td><td>Tech earnings critical</td></tr>
+    </table>
+    <p style="margin-top:8px; font-size:0.75rem; color:#718096;">QQQ offers higher ROC for the same strategy but requires stricter macro blackout discipline. The extra premium is fair compensation for tech earnings volatility.</p>
+  </div>
+
+  <div class="card">
+    <h2>&#128260; The Dip-Buying Mechanism &mdash; QQQ Version</h2>
+    <div class="highlight">QQQ dips tend to be sharper but faster-recovering than SPY.
+This makes put selling especially useful:
+
+Scenario: QQQ at $470, you think $420 is a great dip entry
+  &rarr; Sell QQQ $420 put, 45 DTE &rarr; collect $6.00 premium
+
+  QQQ falls to $415:
+    &rarr; Assigned 100 shares at $420
+    &rarr; Effective cost: $420 &ndash; $6 = $414 ✅
+    &rarr; Place in Core bucket if this is a real dip
+
+  QQQ stays above $420:
+    &rarr; Keep $600 premium
+    &rarr; Sell again next cycle at whatever feels like dip ✅
+
+You pre-committed to a buy price AND got paid to wait.
+No emotional "should I buy now?" decision needed.</div>
+  </div>
+</div>
+
+<!-- QQQ BPS -->
+<div id="qqq-bps" class="content">
+  <div class="card">
+    <div class="strategy-header">
+      <span class="strategy-badge sb-qqq">QQQ</span>
+      <span class="strategy-badge sb-bps">Bull Put Spread</span>
+    </div>
+    <h2>&#127919; Short Put (Income Leg) &mdash; Strike Criteria</h2>
+    <div class="highlight">Identical logic to QQQ Sell Put, but NO assignment possible.
+The spread caps your max loss at the spread width.
+
+Delta (short put): 0.15&ndash;0.20
+OTM%:
+  VIX &lt;18   &rarr; 7&ndash;9% below QQQ
+  VIX 18&ndash;25 &rarr; 10&ndash;12% below QQQ
+  VIX 25&ndash;35 &rarr; 12&ndash;15% below QQQ
+  VIX &gt;35   &rarr; Pause
+DTE:               45 days
+
+Macro blackout: Same as QQQ sell put &mdash; no new BPS the week
+  before Fed, CPI, or any of the 6 big tech earnings.
+  QQQ BPS is especially vulnerable to overnight gaps
+  from single stock earnings misses.
+
+Strike test:  "Would I be comfortable owning QQQ here?"
+  (Keeps discipline even though BPS can't assign)</div>
+  </div>
+
+  <div class="card">
+    <h2>&#127919; Long Put (Protection Leg) &mdash; Strike Criteria</h2>
+    <div class="highlight">Approach A &mdash; Fixed Width (Recommended for QQQ):
+  Use $10&ndash;$15 spread width consistently
+  Short put at $418 &rarr; long put at $403&ndash;$408
+  Wider spreads available but increase max loss proportionally
+
+Approach B &mdash; Key Support Level:
+  Identify major QQQ chart support below your short put
+  Place long put just below that support
+  Example: QQQ support at $400 &rarr; buy $400 put
+
+Target ROC:
+  Net premium &divide; (spread width &times; 100) = 20&ndash;25%
+  QQQ's higher IV naturally produces better ROC than SPY BPS
+  for the same spread width &mdash; this is the premium advantage
+
+ROC check examples:
+  $10-wide: premium ~$2.50 &rarr; ROC = $250/$1,000 = 25% ✅
+  $15-wide: premium ~$3.50 &rarr; ROC = $350/$1,500 = 23% ✅
+  $25-wide: premium ~$5.00 &rarr; ROC = $500/$2,500 = 20% ✅</div>
+
+    <h3>Example (QQQ $470, VIX ~22)</h3>
+    <div class="highlight">Short put: $418 (11% OTM, delta ~0.18)
+Long put:  $403 ($15-wide spread)
+Capital:   $1,500 per spread
+Premium:   ~$3.50&ndash;4.50 net credit
+Max loss:  ($15 &times; 100) &ndash; $400 = $1,100
+ROC:       $400 &divide; $1,500 = 27% ✅
+
+GTC buy-back: $1.75&ndash;2.25 (50% of premium)
+Stop loss:    Collected $4.00 &rarr; close if costs $12.00 to exit
+21 DTE:       Hard close regardless</div>
+  </div>
+
+  <div class="card">
+    <h2>&#128680; QQQ BPS &mdash; Extra Gap Risk Warning</h2>
+    <div class="highlight">QQQ BPS carries more overnight gap risk than SPY BPS.
+
+Why: QQQ = Nasdaq-100. Top 6 stocks = ~50% of index.
+  If NVDA misses earnings &rarr; QQQ can gap 4&ndash;5% overnight
+  Your spread goes from comfortable OTM &rarr; deep ITM instantly
+  Stop loss cannot protect against overnight gaps
+
+Mitigation rules:
+  1. Never open QQQ BPS within 1 week of big tech earnings
+  2. Use $10&ndash;$15 wide spreads max &mdash; limits max loss
+  3. Follow 15&ndash;20% portfolio cap on total BPS collateral
+  4. VIX &gt;35 &rarr; pause all QQQ BPS positions immediately
+  5. After a gap event &mdash; close at market open, don't wait</div>
+
+    <div class="decision-node red">
+      <div class="label">&#128680; If QQQ gaps against your BPS overnight</div>
+      <div class="action">Do NOT wait to see if it recovers. Close at market open. A deep ITM spread on QQQ can hit full max loss within days inside 21 DTE. Take the defined loss and move on &mdash; that's what the spread width is for.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#128202; SPY BPS vs QQQ BPS &mdash; Side by Side</h2>
+    <table>
+      <tr><th>Factor</th><th>SPY BPS</th><th>QQQ BPS</th></tr>
+      <tr><td>Short put OTM% (VIX ~20)</td><td>8&ndash;10%</td><td>10&ndash;12%</td></tr>
+      <tr><td>Spread width</td><td>$10&ndash;$15</td><td>$10&ndash;$15</td></tr>
+      <tr><td>Capital per spread</td><td>$1,000&ndash;$1,500</td><td>$1,000&ndash;$1,500</td></tr>
+      <tr><td>Est. premium (15-wide)</td><td>~$3.00&ndash;4.00</td><td>~$3.50&ndash;4.50</td></tr>
+      <tr><td>Target ROC</td><td>20&ndash;25%</td><td>23&ndash;28%</td></tr>
+      <tr><td>Overnight gap risk</td><td>Lower</td><td>Higher (tech earnings)</td></tr>
+      <tr><td>Macro blackout</td><td>Fed, CPI</td><td>Fed, CPI + 6 big tech earnings</td></tr>
+      <tr><td>VIX pause threshold</td><td>&gt;35</td><td>&gt;35</td></tr>
+    </table>
+    <div class="quote" style="margin-top:12px;">
+      <p>"QQQ BPS earns more premium than SPY BPS for a reason &mdash; tech earnings gaps are real. Respect the macro blackout and the extra ROC is genuinely yours to keep."</p>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div id="summary" class="content">
+  <div class="card">
+    <h2>&#128202; Full Strike Selection Summary Table</h2>
+    <table>
+      <tr>
+        <th>Strategy</th>
+        <th>Delta</th>
+        <th>OTM% (VIX ~20)</th>
+        <th>DTE</th>
+        <th>GTC</th>
+        <th>Hard Close</th>
+        <th>Assignment?</th>
+      </tr>
+      <tr>
+        <td><span class="badge badge-green">SPY CC Core</span></td>
+        <td>0.10&ndash;0.15</td>
+        <td>12&ndash;15% above</td>
+        <td>45</td>
+        <td>50%</td>
+        <td>21 DTE</td>
+        <td>&#10060; Avoid</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-yellow">SPY CC Wheel</span></td>
+        <td>0.20&ndash;0.25</td>
+        <td>8&ndash;10% above</td>
+        <td>45</td>
+        <td>50%</td>
+        <td>21 DTE</td>
+        <td>&#9989; Welcome</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-yellow">SPY Sell Put</span></td>
+        <td>0.15&ndash;0.20</td>
+        <td>8&ndash;10% below</td>
+        <td>45</td>
+        <td>50%</td>
+        <td>21 DTE</td>
+        <td>&#9989; Dip buy</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-red">SPY BPS</span></td>
+        <td>0.15&ndash;0.20</td>
+        <td>8&ndash;10% below</td>
+        <td>45</td>
+        <td>50%</td>
+        <td>21 DTE</td>
+        <td>&#10060; Defined loss</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-purple">QQQ CC Core</span></td>
+        <td>0.10&ndash;0.12</td>
+        <td>15&ndash;18% above</td>
+        <td>45</td>
+        <td>50%</td>
+        <td>21 DTE</td>
+        <td>&#10060; Avoid</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-yellow">QQQ CC Wheel</span></td>
+        <td>0.20&ndash;0.25</td>
+        <td>10&ndash;12% above</td>
+        <td>45</td>
+        <td>50%</td>
+        <td>21 DTE</td>
+        <td>&#9989; Welcome</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-yellow">QQQ Sell Put</span></td>
+        <td>0.15&ndash;0.20</td>
+        <td>10&ndash;12% below</td>
+        <td>45</td>
+        <td>50%</td>
+        <td>21 DTE</td>
+        <td>&#9989; Dip buy</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-red">QQQ BPS</span></td>
+        <td>0.15&ndash;0.20</td>
+        <td>10&ndash;12% below</td>
+        <td>45</td>
+        <td>50%</td>
+        <td>21 DTE</td>
+        <td>&#10060; Defined loss</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>&#127775; One-Line Decision Rule Per Strategy</h2>
+    <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>SPY CC Core:</strong> "Would I regret losing these shares at this price?" &mdash; If ANY doubt &rarr; go higher or skip.</div></div>
+    <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>SPY CC Wheel:</strong> "Am I genuinely happy exiting at this price?" &mdash; If yes &rarr; sell. Assignment = success.</div></div>
+    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>SPY Sell Put:</strong> "Would I happily own 100 more SPY at this price?" &mdash; If yes &rarr; that's your strike.</div></div>
+    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>SPY BPS:</strong> Same short put test as sell put. Then: "Is my max loss position-sized correctly at 15&ndash;20% of portfolio?"</div></div>
+    <div class="rule-box"><div class="rule-num">5</div><div class="rule-text"><strong>QQQ CC Core:</strong> "Is this strike safely above any realistic near-term QQQ target?" &mdash; Go wider than feels necessary.</div></div>
+    <div class="rule-box"><div class="rule-num">6</div><div class="rule-text"><strong>QQQ CC Wheel:</strong> "Am I happy selling QQQ here, AND is there a tech earnings event before expiry?" &mdash; Both must be clear.</div></div>
+    <div class="rule-box"><div class="rule-num">7</div><div class="rule-text"><strong>QQQ Sell Put:</strong> "Would I happily own 100 QQQ at this price?" &mdash; Then check: any big tech earnings this cycle?</div></div>
+    <div class="rule-box"><div class="rule-num">8</div><div class="rule-text"><strong>QQQ BPS:</strong> Same as QQQ sell put but add: "Have I checked the earnings calendar for all 6 big tech names before expiry?"</div></div>
+  </div>
+
+  <div class="card">
+    <h2>&#128201; VIX Quick Reference &mdash; All Strategies</h2>
+    <table>
+      <tr><th>VIX</th><th>SPY CC</th><th>SPY Put / BPS</th><th>QQQ CC</th><th>QQQ Put / BPS</th></tr>
+      <tr><td><span class="badge badge-green">&lt;18</span></td><td>Core 12% / Wheel 8%</td><td>5&ndash;7% OTM</td><td>Core 15% / Wheel 10%</td><td>7&ndash;9% OTM</td></tr>
+      <tr><td><span class="badge badge-yellow">18&ndash;25</span></td><td>Core 15% / Wheel 10%</td><td>8&ndash;10% OTM</td><td>Core 18% / Wheel 12%</td><td>10&ndash;12% OTM</td></tr>
+      <tr><td><span class="badge badge-red">25&ndash;35</span></td><td>Core skip / Wheel 12%</td><td>10&ndash;12% OTM</td><td>Core skip / Wheel 14%</td><td>12&ndash;15% OTM</td></tr>
+      <tr><td><span class="badge badge-red">&gt;35</span></td><td colspan="4" style="text-align:center; color:#fc8181;">&#9888; PAUSE ALL NEW POSITIONS &mdash; SPY, QQQ, CC, Put, BPS</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>&#128197; Macro Blackout Calendar</h2>
+    <table>
+      <tr><th>Event</th><th>SPY strategies</th><th>QQQ strategies</th></tr>
+      <tr><td>Fed meeting / rate decision</td><td>&#10060; No new positions</td><td>&#10060; No new positions</td></tr>
+      <tr><td>CPI / PCE inflation print</td><td>&#10060; No new positions</td><td>&#10060; No new positions</td></tr>
+      <tr><td>AAPL, MSFT, NVDA, META earnings</td><td>&#9989; OK</td><td>&#10060; No new positions</td></tr>
+      <tr><td>AMZN, GOOGL earnings</td><td>&#9989; OK</td><td>&#10060; No new positions</td></tr>
+      <tr><td>Other S&amp;P 500 earnings</td><td>&#9989; OK</td><td>&#9989; OK</td></tr>
+    </table>
+    <p style="margin-top:8px; font-size:0.75rem; color:#718096;">Blackout = the 5 trading days (1 week) BEFORE the event. You can open positions after the event resolves and vol settles.</p>
+  </div>
+
+  <div class="disclaimer">
+    <p>&#9888;&#65039; <strong>Disclaimer:</strong> Educational reference only &mdash; not financial advice. Options trading involves significant risk of loss. All strike prices, premiums and OTM% figures are illustrative examples based on approximate market conditions. Actual values depend on IV, DTE, and market conditions at time of trade. Consult a licensed financial advisor before trading.</p>
+  </div>
+</div>
+
+<script>
+  function showTab(id, el) {
+    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

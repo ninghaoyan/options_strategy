@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capital Allocation Calculator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  header { background: linear-gradient(135deg, #1a1f2e, #252d3d); padding: 24px 20px; border-bottom: 1px solid #2d3748; }
+  .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #718096; text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+  .back-link:hover { color: #63b3ed; }
+  header h1 { font-size: 1.4rem; font-weight: 700; color: #63b3ed; }
+  header p { font-size: 0.8rem; color: #718096; margin-top: 4px; }
+  .page { max-width: 800px; margin: 0 auto; padding: 20px 16px; }
+
+  /* INPUT SECTION */
+  .input-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .input-card h2 { font-size: 0.95rem; font-weight: 700; color: #63b3ed; margin-bottom: 16px; }
+  .input-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .input-label { font-size: 0.82rem; color: #a0aec0; flex: 1; }
+  .input-field-wrap { position: relative; }
+  .input-prefix { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 0.9rem; color: #63b3ed; font-weight: 700; pointer-events: none; }
+  .input-field { background: #252d3d; border: 1px solid #4a5568; border-radius: 8px; color: #e2e8f0; font-size: 1rem; font-weight: 700; padding: 10px 14px 10px 28px; width: 180px; outline: none; transition: border-color 0.2s; }
+  .input-field:focus { border-color: #63b3ed; }
+  .input-field::placeholder { color: #4a5568; font-weight: 400; font-size: 0.85rem; }
+
+  /* SLIDER SECTION */
+  .sliders-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .sliders-card h2 { font-size: 0.95rem; font-weight: 700; color: #63b3ed; margin-bottom: 6px; }
+  .sliders-card .subtitle { font-size: 0.77rem; color: #718096; margin-bottom: 16px; }
+  .slider-group { margin-bottom: 6px; }
+  .slider-label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .slider-name { font-size: 0.78rem; color: #a0aec0; }
+  .slider-pct { font-size: 0.78rem; font-weight: 700; color: #63b3ed; min-width: 36px; text-align: right; }
+  input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; background: #2d3748; outline: none; margin-bottom: 10px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; cursor: pointer; }
+  .slider-core::-webkit-slider-thumb { background: #68d391; }
+  .slider-wheel::-webkit-slider-thumb { background: #f6ad55; }
+  .slider-bps::-webkit-slider-thumb { background: #fc8181; }
+  .total-pct-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-top: 1px solid #2d3748; margin-top: 6px; }
+  .total-pct-label { font-size: 0.8rem; color: #718096; }
+  .total-pct-val { font-size: 0.88rem; font-weight: 700; }
+  .total-ok { color: #68d391; }
+  .total-warn { color: #fc8181; }
+
+  /* RESULTS SECTION */
+  .results-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .results-card h2 { font-size: 0.95rem; font-weight: 700; color: #63b3ed; margin-bottom: 14px; }
+  .bucket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  @media (max-width: 500px) { .bucket-grid { grid-template-columns: 1fr; } }
+  .bucket-tile { background: #252d3d; border-radius: 10px; padding: 14px; border-left: 3px solid #4a5568; }
+  .bucket-tile.core-spy { border-left-color: #63b3ed; }
+  .bucket-tile.core-qqq { border-left-color: #b794f4; }
+  .bucket-tile.wheel-spy { border-left-color: #f6ad55; }
+  .bucket-tile.wheel-qqq { border-left-color: #f6ad55; }
+  .bucket-tile.bps-spy { border-left-color: #fc8181; }
+  .bucket-tile.bps-qqq { border-left-color: #fc8181; }
+  .tile-tag { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #718096; margin-bottom: 4px; }
+  .tile-name { font-size: 0.82rem; font-weight: 700; color: #e2e8f0; margin-bottom: 8px; }
+  .tile-amount { font-size: 1.3rem; font-weight: 700; color: #63b3ed; margin-bottom: 4px; }
+  .tile-amount.purple { color: #b794f4; }
+  .tile-amount.yellow { color: #f6ad55; }
+  .tile-amount.red { color: #fc8181; }
+  .tile-pct { font-size: 0.72rem; color: #718096; margin-bottom: 8px; }
+  .tile-detail { font-size: 0.72rem; color: #a0aec0; line-height: 1.5; }
+  .tile-detail span { color: #68d391; font-weight: 600; }
+  .tile-warn { font-size: 0.7rem; color: #f6ad55; margin-top: 4px; }
+
+  /* SUMMARY BAR */
+  .summary-bar-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .summary-bar-card h2 { font-size: 0.95rem; font-weight: 700; color: #63b3ed; margin-bottom: 14px; }
+  .bar-wrap { height: 28px; border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 12px; }
+  .bar-seg { height: 100%; transition: width 0.4s ease; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; color: #0f1117; overflow: hidden; white-space: nowrap; }
+  .bar-core-spy { background: #63b3ed; }
+  .bar-core-qqq { background: #b794f4; }
+  .bar-wheel-spy { background: #f6ad55; }
+  .bar-wheel-qqq { background: #ed8936; }
+  .bar-bps-spy { background: #fc8181; }
+  .bar-bps-qqq { background: #e53e3e; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: #a0aec0; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* INCOME ESTIMATE */
+  .income-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .income-card h2 { font-size: 0.95rem; font-weight: 700; color: #63b3ed; margin-bottom: 6px; }
+  .income-card .subtitle { font-size: 0.77rem; color: #718096; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.77rem; }
+  th { background: #252d3d; color: #63b3ed; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { padding: 8px 10px; border-bottom: 1px solid #2d3748; color: #cbd5e0; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #252d3d; }
+  .total-row td { color: #68d391; font-weight: 700; background: #1a2e1a; }
+
+  /* RATIONALE */
+  .rationale-card { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .rationale-card h2 { font-size: 0.95rem; font-weight: 700; color: #63b3ed; margin-bottom: 12px; }
+  .rule-box { display: flex; align-items: flex-start; gap: 10px; background: #252d3d; border-radius: 8px; padding: 12px; margin: 8px 0; }
+  .rule-num { background: #63b3ed; color: #0f1117; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; }
+  .rule-text { font-size: 0.8rem; color: #cbd5e0; line-height: 1.5; }
+  .highlight { background: #252d3d; border-left: 3px solid #63b3ed; border-radius: 6px; padding: 12px; margin: 10px 0; font-size: 0.78rem; color: #e2e8f0; font-family: monospace; line-height: 1.8; white-space: pre-wrap; }
+  .phase-row { display: flex; gap: 10px; margin: 8px 0; }
+  .phase-badge { background: #1a2a3a; color: #63b3ed; font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; margin-top: 2px; }
+  .phase-text { font-size: 0.8rem; color: #cbd5e0; line-height: 1.5; }
+  .disclaimer { background: #2d2000; border: 1px solid #744210; border-radius: 8px; padding: 12px; margin-top: 16px; }
+  .disclaimer p { font-size: 0.75rem; color: #f6ad55; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="index.html">&#8592; Back to Strategy Hub</a>
+  <h1>&#128200; Capital Allocation Calculator</h1>
+  <p>SPY &amp; QQQ &mdash; Core Hold &middot; Wheel &middot; Bull Put Spread</p>
+</header>
+
+<div class="page">
+
+  <!-- INPUT -->
+  <div class="input-card">
+    <h2>&#128181; Enter Your Total Capital</h2>
+    <div class="input-row">
+      <div class="input-label">Total capital available for SPY &amp; QQQ strategies<br><span style="font-size:0.72rem; color:#4a5568;">Exclude capital in TQQQ, UUUU, USAR, TMQ</span></div>
+      <div class="input-field-wrap">
+        <span class="input-prefix">$</span>
+        <input class="input-field" type="number" id="totalCapital" placeholder="e.g. 150000" min="0" oninput="recalculate()" />
+      </div>
+    </div>
+    <div class="input-row" style="margin-bottom:0;">
+      <div class="input-label">SPY vs QQQ underlying split</div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:0.78rem; color:#63b3ed; font-weight:700;" id="spyPctLabel">55% SPY</span>
+        <input type="range" id="spyQqqSlider" min="40" max="70" value="55" step="5"
+          style="width:120px; margin-bottom:0;"
+          class="slider-core" oninput="updateSpyLabel(); recalculate();" />
+        <span style="font-size:0.78rem; color:#b794f4; font-weight:700;" id="qqqPctLabel">45% QQQ</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALLOCATION SLIDERS -->
+  <div class="sliders-card">
+    <h2>&#9881;&#65039; Adjust Allocation Percentages</h2>
+    <p class="subtitle">Drag sliders to customise. Total must equal 100%.</p>
+
+    <div class="slider-group">
+      <div class="slider-label-row">
+        <span class="slider-name">&#128308; Core Long-Term Hold</span>
+        <span class="slider-pct" id="corePctDisplay">70%</span>
+      </div>
+      <input type="range" id="coreSlider" min="40" max="90" value="70" step="5" class="slider-core"
+        oninput="onSliderChange('core')" />
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label-row">
+        <span class="slider-name">&#128260; Wheel Bucket (CC income)</span>
+        <span class="slider-pct" id="wheelPctDisplay">15%</span>
+      </div>
+      <input type="range" id="wheelSlider" min="5" max="40" value="15" step="5" class="slider-wheel"
+        oninput="onSliderChange('wheel')" />
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label-row">
+        <span class="slider-name">&#128308; BPS Collateral (defined-risk income)</span>
+        <span class="slider-pct" id="bpsPctDisplay">15%</span>
+      </div>
+      <input type="range" id="bpsSlider" min="5" max="40" value="15" step="5" class="slider-bps"
+        oninput="onSliderChange('bps')" />
+    </div>
+
+    <div class="total-pct-row">
+      <span class="total-pct-label">Total allocated</span>
+      <span class="total-pct-val" id="totalPctDisplay">100%</span>
+    </div>
+  </div>
+
+  <!-- VISUAL BAR -->
+  <div class="summary-bar-card">
+    <h2>&#128202; Allocation Breakdown</h2>
+    <div class="bar-wrap" id="allocationBar">
+      <div class="bar-seg bar-core-spy" id="barCoreSpy"></div>
+      <div class="bar-seg bar-core-qqq" id="barCoreQqq"></div>
+      <div class="bar-seg bar-wheel-spy" id="barWheelSpy"></div>
+      <div class="bar-seg bar-wheel-qqq" id="barWheelQqq"></div>
+      <div class="bar-seg bar-bps-spy" id="barBpsSpy"></div>
+      <div class="bar-seg bar-bps-qqq" id="barBpsQqq"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#63b3ed;"></div>SPY Core</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#b794f4;"></div>QQQ Core</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f6ad55;"></div>SPY Wheel</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ed8936;"></div>QQQ Wheel</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fc8181;"></div>SPY BPS</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e53e3e;"></div>QQQ BPS</div>
+    </div>
+  </div>
+
+  <!-- BUCKET TILES -->
+  <div class="results-card">
+    <h2>&#128181; Allocation Per Bucket</h2>
+    <div class="bucket-grid">
+      <div class="bucket-tile core-spy">
+        <div class="tile-tag">Core &mdash; Long-Term Hold</div>
+        <div class="tile-name">SPY Core</div>
+        <div class="tile-amount" id="spyCoreAmt">—</div>
+        <div class="tile-pct" id="spyCorePct">— of total</div>
+        <div class="tile-detail" id="spyCoreShares">Enter capital above</div>
+      </div>
+      <div class="bucket-tile core-qqq">
+        <div class="tile-tag">Core &mdash; Long-Term Hold</div>
+        <div class="tile-name">QQQ Core</div>
+        <div class="tile-amount purple" id="qqqCoreAmt">—</div>
+        <div class="tile-pct" id="qqqCorePct">— of total</div>
+        <div class="tile-detail" id="qqqCoreShares">Enter capital above</div>
+      </div>
+      <div class="bucket-tile wheel-spy">
+        <div class="tile-tag">Wheel &mdash; CC Income</div>
+        <div class="tile-name">SPY Wheel</div>
+        <div class="tile-amount yellow" id="spyWheelAmt">—</div>
+        <div class="tile-pct" id="spyWheelPct">— of total</div>
+        <div class="tile-detail" id="spyWheelShares">Enter capital above</div>
+        <div class="tile-warn" id="spyWheelWarn"></div>
+      </div>
+      <div class="bucket-tile wheel-qqq">
+        <div class="tile-tag">Wheel &mdash; CC Income</div>
+        <div class="tile-name">QQQ Wheel</div>
+        <div class="tile-amount yellow" id="qqqWheelAmt">—</div>
+        <div class="tile-pct" id="qqqWheelPct">— of total</div>
+        <div class="tile-detail" id="qqqWheelShares">Enter capital above</div>
+        <div class="tile-warn" id="qqqWheelWarn"></div>
+      </div>
+      <div class="bucket-tile bps-spy">
+        <div class="tile-tag">BPS &mdash; Defined-Risk Income</div>
+        <div class="tile-name">SPY BPS Collateral</div>
+        <div class="tile-amount red" id="spyBpsAmt">—</div>
+        <div class="tile-pct" id="spyBpsPct">— of total</div>
+        <div class="tile-detail" id="spyBpsSpreads">Enter capital above</div>
+      </div>
+      <div class="bucket-tile bps-qqq">
+        <div class="tile-tag">BPS &mdash; Defined-Risk Income</div>
+        <div class="tile-name">QQQ BPS Collateral</div>
+        <div class="tile-amount red" id="qqqBpsAmt">—</div>
+        <div class="tile-pct" id="qqqBpsPct">— of total</div>
+        <div class="tile-detail" id="qqqBpsSpreads">Enter capital above</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INCOME ESTIMATE -->
+  <div class="income-card">
+    <h2>&#128176; Estimated Monthly Income</h2>
+    <p class="subtitle">Based on current VIX ~24 conditions. Premiums are illustrative estimates only.</p>
+    <table>
+      <tr>
+        <th>Source</th>
+        <th>Capital</th>
+        <th>Est. Monthly (Low)</th>
+        <th>Est. Monthly (High)</th>
+      </tr>
+      <tr>
+        <td>SPY Wheel CC</td>
+        <td id="incSpyWheelCap">—</td>
+        <td id="incSpyWheelLo">—</td>
+        <td id="incSpyWheelHi">—</td>
+      </tr>
+      <tr>
+        <td>QQQ Wheel CC</td>
+        <td id="incQqqWheelCap">—</td>
+        <td id="incQqqWheelLo">—</td>
+        <td id="incQqqWheelHi">—</td>
+      </tr>
+      <tr>
+        <td>SPY BPS</td>
+        <td id="incSpyBpsCap">—</td>
+        <td id="incSpyBpsLo">—</td>
+        <td id="incSpyBpsHi">—</td>
+      </tr>
+      <tr>
+        <td>QQQ BPS</td>
+        <td id="incQqqBpsCap">—</td>
+        <td id="incQqqBpsLo">—</td>
+        <td id="incQqqBpsHi">—</td>
+      </tr>
+      <tr class="total-row">
+        <td><strong>Total estimated</strong></td>
+        <td id="incTotalCap">—</td>
+        <td id="incTotalLo">—</td>
+        <td id="incTotalHi">—</td>
+      </tr>
+    </table>
+    <p style="margin-top:10px; font-size:0.72rem; color:#718096;">&#9888; Income is from Wheel and BPS only. Core shares compound silently &mdash; reinvest all premium into Core for maximum long-term growth.</p>
+  </div>
+
+  <!-- RATIONALE -->
+  <div class="rationale-card">
+    <h2>&#128214; Why These Allocations</h2>
+    <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>Core is your wealth engine (default 70%).</strong> Long-term compounding does the heavy lifting. Options income is supplementary &mdash; never let it reduce your Core exposure.</div></div>
+    <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>Wheel bucket (default 15%) generates CC income.</strong> You need 100 shares minimum per CC contract. Build Wheel shares via put assignment first, then start selling calls.</div></div>
+    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>BPS collateral (default 15%) earns income without owning shares.</strong> Runs in parallel with Core. All premium reinvests into Core &mdash; accelerating compounding.</div></div>
+    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>55/45 SPY/QQQ split.</strong> SPY provides stability anchor. QQQ overweighted for growth. Adjust with the slider based on your risk tolerance.</div></div>
+    <div class="rule-box"><div class="rule-num">5</div><div class="rule-text"><strong>All options income reinvests into Core.</strong> A $600/month BPS income reinvested into SPY/QQQ Core compounds for 20 years. That&rsquo;s the real wealth builder &mdash; not the $600 itself.</div></div>
+
+    <h3 style="font-size:0.82rem; font-weight:600; color:#a0aec0; margin:16px 0 10px;">Building Phase &mdash; When Wheel Shares Are Not Yet Enough</h3>
+    <div class="phase-row"><div class="phase-badge">Phase 1</div><div class="phase-text">Run BPS only. Use sell put strategy to accumulate Wheel shares via assignment. No CC yet &mdash; not enough shares per contract.</div></div>
+    <div class="phase-row"><div class="phase-badge">Phase 2</div><div class="phase-text">100+ Wheel shares per ticker. Start selling 1 CC contract per bucket. BPS continues in parallel.</div></div>
+    <div class="phase-row"><div class="phase-badge">Phase 3</div><div class="phase-text">200+ Wheel shares. Full strategy running. All premium income flows into Core. Rebalance quarterly.</div></div>
+
+    <div class="highlight" style="margin-top:14px;">Reinvestment loop:
+BPS premium earned  &rarr; buy more SPY/QQQ Core shares
+CC premium earned   &rarr; buy more SPY/QQQ Core shares
+Wheel assignment    &rarr; cash back to BPS/sell put cycle
+                    &rarr; get assigned again at lower price
+                    &rarr; those shares join Core or Wheel
+
+Every dollar of options income compounding in Core
+at 10% average annual return &times; 20 years = 6.7&times; growth.
+The premium is not the wealth &mdash; the compounded shares are.</div>
+  </div>
+
+  <div class="disclaimer">
+    <p>&#9888;&#65039; <strong>Disclaimer:</strong> Educational reference only &mdash; not financial advice. Income estimates are illustrative and based on approximate current market conditions. Actual premiums depend on IV, DTE, strike selection, and market conditions at time of trade. Share counts use approximate prices (SPY ~$555, QQQ ~$470) and will vary. Consult a licensed financial advisor before trading.</p>
+  </div>
+
+</div>
+
+<script>
+  // --- Approximate prices ---
+  const SPY_PRICE = 555;
+  const QQQ_PRICE = 470;
+
+  // --- Slider interlock: core drives the others ---
+  function onSliderChange(changed) {
+    const core  = parseInt(document.getElementById('coreSlider').value);
+    const wheel = parseInt(document.getElementById('wheelSlider').value);
+    const bps   = parseInt(document.getElementById('bpsSlider').value);
+    let total = core + wheel + bps;
+
+    // Auto-adjust the OTHER two to keep total = 100
+    if (changed === 'core') {
+      const remaining = 100 - core;
+      const ratio = wheel / (wheel + bps || 1);
+      let newWheel = Math.round(remaining * ratio / 5) * 5;
+      let newBps   = remaining - newWheel;
+      newWheel = Math.max(5, Math.min(40, newWheel));
+      newBps   = Math.max(5, Math.min(40, newBps));
+      document.getElementById('wheelSlider').value = newWheel;
+      document.getElementById('bpsSlider').value   = newBps;
+    } else if (changed === 'wheel') {
+      const remaining = 100 - core - wheel;
+      const newBps = Math.max(5, Math.min(40, remaining));
+      document.getElementById('bpsSlider').value = newBps;
+    } else {
+      const remaining = 100 - core - bps;
+      const newWheel = Math.max(5, Math.min(40, remaining));
+      document.getElementById('wheelSlider').value = newWheel;
+    }
+
+    updateSliderDisplays();
+    recalculate();
+  }
+
+  function updateSliderDisplays() {
+    const core  = parseInt(document.getElementById('coreSlider').value);
+    const wheel = parseInt(document.getElementById('wheelSlider').value);
+    const bps   = parseInt(document.getElementById('bpsSlider').value);
+    const total = core + wheel + bps;
+    document.getElementById('corePctDisplay').textContent  = core  + '%';
+    document.getElementById('wheelPctDisplay').textContent = wheel + '%';
+    document.getElementById('bpsPctDisplay').textContent   = bps   + '%';
+    const el = document.getElementById('totalPctDisplay');
+    el.textContent = total + '%';
+    el.className = 'total-pct-val ' + (total === 100 ? 'total-ok' : 'total-warn');
+  }
+
+  function updateSpyLabel() {
+    const spy = parseInt(document.getElementById('spyQqqSlider').value);
+    const qqq = 100 - spy;
+    document.getElementById('spyPctLabel').textContent = spy + '% SPY';
+    document.getElementById('qqqPctLabel').textContent = qqq + '% QQQ';
+  }
+
+  function fmt(n) {
+    if (!n && n !== 0) return '—';
+    return '$' + Math.round(n).toLocaleString();
+  }
+
+  function recalculate() {
+    const totalRaw = parseFloat(document.getElementById('totalCapital').value);
+    const total    = isNaN(totalRaw) || totalRaw <= 0 ? 0 : totalRaw;
+
+    const corePct  = parseInt(document.getElementById('coreSlider').value) / 100;
+    const wheelPct = parseInt(document.getElementById('wheelSlider').value) / 100;
+    const bpsPct   = parseInt(document.getElementById('bpsSlider').value) / 100;
+    const spyRatio = parseInt(document.getElementById('spyQqqSlider').value) / 100;
+    const qqqRatio = 1 - spyRatio;
+
+    // --- Dollar amounts ---
+    const coreTotal  = total * corePct;
+    const wheelTotal = total * wheelPct;
+    const bpsTotal   = total * bpsPct;
+
+    const spyCoreAmt  = coreTotal  * spyRatio;
+    const qqqCoreAmt  = coreTotal  * qqqRatio;
+    const spyWheelAmt = wheelTotal * spyRatio;
+    const qqqWheelAmt = wheelTotal * qqqRatio;
+    const spyBpsAmt   = bpsTotal   * spyRatio;
+    const qqqBpsAmt   = bpsTotal   * qqqRatio;
+
+    // --- Share counts ---
+    const spyCoreShares  = Math.floor(spyCoreAmt  / SPY_PRICE);
+    const qqqCoreShares  = Math.floor(qqqCoreAmt  / QQQ_PRICE);
+    const spyWheelShares = Math.floor(spyWheelAmt / SPY_PRICE);
+    const qqqWheelShares = Math.floor(qqqWheelAmt / QQQ_PRICE);
+
+    // --- BPS spreads (15-wide = $1500 collateral each) ---
+    const spyBpsSpreads  = Math.floor(spyBpsAmt / 1500);
+    const qqqBpsSpreads  = Math.floor(qqqBpsAmt / 1500);
+
+    // --- CC contracts ---
+    const spyCCContracts = Math.floor(spyWheelShares / 100);
+    const qqqCCContracts = Math.floor(qqqWheelShares / 100);
+
+    const empty = total === 0;
+
+    // --- Update tiles ---
+    document.getElementById('spyCoreAmt').textContent   = empty ? '—' : fmt(spyCoreAmt);
+    document.getElementById('qqqCoreAmt').textContent   = empty ? '—' : fmt(qqqCoreAmt);
+    document.getElementById('spyWheelAmt').textContent  = empty ? '—' : fmt(spyWheelAmt);
+    document.getElementById('qqqWheelAmt').textContent  = empty ? '—' : fmt(qqqWheelAmt);
+    document.getElementById('spyBpsAmt').textContent    = empty ? '—' : fmt(spyBpsAmt);
+    document.getElementById('qqqBpsAmt').textContent    = empty ? '—' : fmt(qqqBpsAmt);
+
+    const sp = (n, pct) => empty ? '— of total' : Math.round(pct * 100) + '% of total';
+    document.getElementById('spyCorePct').textContent  = sp(spyCoreAmt,  corePct * spyRatio);
+    document.getElementById('qqqCorePct').textContent  = sp(qqqCoreAmt,  corePct * qqqRatio);
+    document.getElementById('spyWheelPct').textContent = sp(spyWheelAmt, wheelPct * spyRatio);
+    document.getElementById('qqqWheelPct').textContent = sp(qqqWheelAmt, wheelPct * qqqRatio);
+    document.getElementById('spyBpsPct').textContent   = sp(spyBpsAmt,   bpsPct * spyRatio);
+    document.getElementById('qqqBpsPct').textContent   = sp(qqqBpsAmt,   bpsPct * qqqRatio);
+
+    // --- Share detail text ---
+    if (empty) {
+      ['spyCoreShares','qqqCoreShares','spyWheelShares','qqqWheelShares','spyBpsSpreads','qqqBpsSpreads'].forEach(id => {
+        document.getElementById(id).innerHTML = 'Enter capital above';
+      });
+    } else {
+      document.getElementById('spyCoreShares').innerHTML  = `~<span>${spyCoreShares} shares</span> of SPY @ $${SPY_PRICE}`;
+      document.getElementById('qqqCoreShares').innerHTML  = `~<span>${qqqCoreShares} shares</span> of QQQ @ $${QQQ_PRICE}`;
+      document.getElementById('spyWheelShares').innerHTML = `~<span>${spyWheelShares} shares</span> &rarr; <span>${spyCCContracts} CC contract${spyCCContracts !== 1 ? 's' : ''}</span>`;
+      document.getElementById('qqqWheelShares').innerHTML = `~<span>${qqqWheelShares} shares</span> &rarr; <span>${qqqCCContracts} CC contract${qqqCCContracts !== 1 ? 's' : ''}</span>`;
+      document.getElementById('spyBpsSpreads').innerHTML  = `~<span>${spyBpsSpreads} spreads</span> @ $1,500 collateral each`;
+      document.getElementById('qqqBpsSpreads').innerHTML  = `~<span>${qqqBpsSpreads} spreads</span> @ $1,500 collateral each`;
+    }
+
+    // --- Wheel warnings ---
+    document.getElementById('spyWheelWarn').textContent = (!empty && spyWheelShares < 100)
+      ? '⚠️ Need 100 shares for 1 CC. Build via put assignment first.' : '';
+    document.getElementById('qqqWheelWarn').textContent = (!empty && qqqWheelShares < 100)
+      ? '⚠️ Need 100 shares for 1 CC. Build via put assignment first.' : '';
+
+    // --- Allocation bar ---
+    const segs = [
+      { id: 'barCoreSpy',   pct: corePct  * spyRatio * 100, label: 'SPY Core' },
+      { id: 'barCoreQqq',   pct: corePct  * qqqRatio * 100, label: 'QQQ Core' },
+      { id: 'barWheelSpy',  pct: wheelPct * spyRatio * 100, label: 'SPY Wheel' },
+      { id: 'barWheelQqq',  pct: wheelPct * qqqRatio * 100, label: 'QQQ Wheel' },
+      { id: 'barBpsSpy',    pct: bpsPct   * spyRatio * 100, label: 'SPY BPS' },
+      { id: 'barBpsQqq',    pct: bpsPct   * qqqRatio * 100, label: 'QQQ BPS' },
+    ];
+    segs.forEach(s => {
+      const el = document.getElementById(s.id);
+      el.style.width = s.pct + '%';
+      el.textContent = s.pct >= 8 ? s.label : '';
+    });
+
+    // --- Income estimates ---
+    // SPY CC: ~$2.50–3.50 per contract per 45-day cycle (~monthly)
+    // QQQ CC: ~$3.50–5.00 per contract
+    // SPY BPS 15-wide: ~$3.00–4.00 per spread per cycle
+    // QQQ BPS 15-wide: ~$3.50–4.50 per spread
+    const incSpyWheelLo = spyCCContracts * 250;
+    const incSpyWheelHi = spyCCContracts * 350;
+    const incQqqWheelLo = qqqCCContracts * 350;
+    const incQqqWheelHi = qqqCCContracts * 500;
+    const incSpyBpsLo   = spyBpsSpreads  * 300;
+    const incSpyBpsHi   = spyBpsSpreads  * 400;
+    const incQqqBpsLo   = qqqBpsSpreads  * 350;
+    const incQqqBpsHi   = qqqBpsSpreads  * 450;
+
+    const totalLo = incSpyWheelLo + incQqqWheelLo + incSpyBpsLo + incQqqBpsLo;
+    const totalHi = incSpyWheelHi + incQqqWheelHi + incSpyBpsHi + incQqqBpsHi;
+
+    const fmtInc = n => empty ? '—' : (n > 0 ? '$' + n.toLocaleString() : '$0');
+
+    document.getElementById('incSpyWheelCap').textContent = empty ? '—' : fmt(spyWheelAmt);
+    document.getElementById('incSpyWheelLo').textContent  = fmtInc(incSpyWheelLo);
+    document.getElementById('incSpyWheelHi').textContent  = fmtInc(incSpyWheelHi);
+    document.getElementById('incQqqWheelCap').textContent = empty ? '—' : fmt(qqqWheelAmt);
+    document.getElementById('incQqqWheelLo').textContent  = fmtInc(incQqqWheelLo);
+    document.getElementById('incQqqWheelHi').textContent  = fmtInc(incQqqWheelHi);
+    document.getElementById('incSpyBpsCap').textContent   = empty ? '—' : fmt(spyBpsAmt);
+    document.getElementById('incSpyBpsLo').textContent    = fmtInc(incSpyBpsLo);
+    document.getElementById('incSpyBpsHi').textContent    = fmtInc(incSpyBpsHi);
+    document.getElementById('incQqqBpsCap').textContent   = empty ? '—' : fmt(qqqBpsAmt);
+    document.getElementById('incQqqBpsLo').textContent    = fmtInc(incQqqBpsLo);
+    document.getElementById('incQqqBpsHi').textContent    = fmtInc(incQqqBpsHi);
+    document.getElementById('incTotalCap').textContent    = empty ? '—' : fmt(spyWheelAmt + qqqWheelAmt + spyBpsAmt + qqqBpsAmt);
+    document.getElementById('incTotalLo').textContent     = fmtInc(totalLo);
+    document.getElementById('incTotalHi').textContent     = fmtInc(totalHi);
+  }
+
+  // --- Init ---
+  updateSliderDisplays();
+  updateSpyLabel();
+  recalculate();
+</script>
+</body>
+</html>

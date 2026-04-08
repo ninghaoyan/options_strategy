@@ -119,12 +119,15 @@
 
   <!-- INPUT -->
   <div class="input-card">
-    <h2>&#128181; Enter Your Total Capital</h2>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="margin-bottom:0;">&#128181; Enter Your Total Capital</h2>
+      <span id="saveIndicator" style="font-size:0.7rem; color:#4a5568;">—</span>
+    </div>
     <div class="input-row">
-      <div class="input-label">Total capital available for SPY &amp; QQQ strategies<br><span style="font-size:0.72rem; color:#4a5568;">Exclude capital in TQQQ, UUUU, USAR, TMQ</span></div>
+      <div class="input-label">Total capital available for SPY &amp; QQQ strategies</div>
       <div class="input-field-wrap">
         <span class="input-prefix">$</span>
-        <input class="input-field" type="number" id="totalCapital" placeholder="e.g. 150000" min="0" oninput="recalculate()" />
+        <input class="input-field" type="number" id="totalCapital" placeholder="e.g. 150000" min="0" />
       </div>
     </div>
     <div class="input-row" style="margin-bottom:0;">
@@ -133,7 +136,7 @@
         <span style="font-size:0.78rem; color:#63b3ed; font-weight:700;" id="spyPctLabel">55% SPY</span>
         <input type="range" id="spyQqqSlider" min="40" max="70" value="55" step="5"
           style="width:120px; margin-bottom:0;"
-          class="slider-core" oninput="updateSpyLabel(); recalculate();" />
+          class="slider-core" />
         <span style="font-size:0.78rem; color:#b794f4; font-weight:700;" id="qqqPctLabel">45% QQQ</span>
       </div>
     </div>
@@ -327,18 +330,61 @@ The premium is not the wealth &mdash; the compounded shares are.</div>
 </div>
 
 <script>
-  // --- Approximate prices ---
   const SPY_PRICE = 555;
   const QQQ_PRICE = 470;
+  const STORAGE_KEY = 'alloc_calc_v1';
 
-  // --- Slider interlock: core drives the others ---
+  // --- Save to localStorage ---
+  function saveSettings() {
+    const settings = {
+      capital:   document.getElementById('totalCapital').value,
+      spyQqq:    document.getElementById('spyQqqSlider').value,
+      core:      document.getElementById('coreSlider').value,
+      wheel:     document.getElementById('wheelSlider').value,
+      bps:       document.getElementById('bpsSlider').value,
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      showSaveIndicator('✓ Saved');
+    } catch(e) {
+      showSaveIndicator('Could not save');
+    }
+  }
+
+  function showSaveIndicator(msg) {
+    const el = document.getElementById('saveIndicator');
+    el.textContent = msg;
+    el.style.color = msg.startsWith('✓') ? '#68d391' : '#fc8181';
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => {
+      el.textContent = '— settings auto-saved';
+      el.style.color = '#4a5568';
+    }, 2000);
+  }
+
+  // --- Load from localStorage ---
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const s = JSON.parse(raw);
+      if (s.capital)  document.getElementById('totalCapital').value  = s.capital;
+      if (s.spyQqq)   document.getElementById('spyQqqSlider').value  = s.spyQqq;
+      if (s.core)     document.getElementById('coreSlider').value    = s.core;
+      if (s.wheel)    document.getElementById('wheelSlider').value   = s.wheel;
+      if (s.bps)      document.getElementById('bpsSlider').value     = s.bps;
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  // --- Slider interlock ---
   function onSliderChange(changed) {
     const core  = parseInt(document.getElementById('coreSlider').value);
     const wheel = parseInt(document.getElementById('wheelSlider').value);
     const bps   = parseInt(document.getElementById('bpsSlider').value);
-    let total = core + wheel + bps;
 
-    // Auto-adjust the OTHER two to keep total = 100
     if (changed === 'core') {
       const remaining = 100 - core;
       const ratio = wheel / (wheel + bps || 1);
@@ -350,16 +396,15 @@ The premium is not the wealth &mdash; the compounded shares are.</div>
       document.getElementById('bpsSlider').value   = newBps;
     } else if (changed === 'wheel') {
       const remaining = 100 - core - wheel;
-      const newBps = Math.max(5, Math.min(40, remaining));
-      document.getElementById('bpsSlider').value = newBps;
+      document.getElementById('bpsSlider').value = Math.max(5, Math.min(40, remaining));
     } else {
       const remaining = 100 - core - bps;
-      const newWheel = Math.max(5, Math.min(40, remaining));
-      document.getElementById('wheelSlider').value = newWheel;
+      document.getElementById('wheelSlider').value = Math.max(5, Math.min(40, remaining));
     }
 
     updateSliderDisplays();
     recalculate();
+    saveSettings();
   }
 
   function updateSliderDisplays() {
@@ -377,9 +422,8 @@ The premium is not the wealth &mdash; the compounded shares are.</div>
 
   function updateSpyLabel() {
     const spy = parseInt(document.getElementById('spyQqqSlider').value);
-    const qqq = 100 - spy;
     document.getElementById('spyPctLabel').textContent = spy + '% SPY';
-    document.getElementById('qqqPctLabel').textContent = qqq + '% QQQ';
+    document.getElementById('qqqPctLabel').textContent = (100 - spy) + '% QQQ';
   }
 
   function fmt(n) {
@@ -397,7 +441,6 @@ The premium is not the wealth &mdash; the compounded shares are.</div>
     const spyRatio = parseInt(document.getElementById('spyQqqSlider').value) / 100;
     const qqqRatio = 1 - spyRatio;
 
-    // --- Dollar amounts ---
     const coreTotal  = total * corePct;
     const wheelTotal = total * wheelPct;
     const bpsTotal   = total * bpsPct;
@@ -409,23 +452,17 @@ The premium is not the wealth &mdash; the compounded shares are.</div>
     const spyBpsAmt   = bpsTotal   * spyRatio;
     const qqqBpsAmt   = bpsTotal   * qqqRatio;
 
-    // --- Share counts ---
     const spyCoreShares  = Math.floor(spyCoreAmt  / SPY_PRICE);
     const qqqCoreShares  = Math.floor(qqqCoreAmt  / QQQ_PRICE);
     const spyWheelShares = Math.floor(spyWheelAmt / SPY_PRICE);
     const qqqWheelShares = Math.floor(qqqWheelAmt / QQQ_PRICE);
-
-    // --- BPS spreads (15-wide = $1500 collateral each) ---
-    const spyBpsSpreads  = Math.floor(spyBpsAmt / 1500);
-    const qqqBpsSpreads  = Math.floor(qqqBpsAmt / 1500);
-
-    // --- CC contracts ---
+    const spyBpsSpreads  = Math.floor(spyBpsAmt   / 1500);
+    const qqqBpsSpreads  = Math.floor(qqqBpsAmt   / 1500);
     const spyCCContracts = Math.floor(spyWheelShares / 100);
     const qqqCCContracts = Math.floor(qqqWheelShares / 100);
 
     const empty = total === 0;
 
-    // --- Update tiles ---
     document.getElementById('spyCoreAmt').textContent   = empty ? '—' : fmt(spyCoreAmt);
     document.getElementById('qqqCoreAmt').textContent   = empty ? '—' : fmt(qqqCoreAmt);
     document.getElementById('spyWheelAmt').textContent  = empty ? '—' : fmt(spyWheelAmt);
@@ -433,15 +470,14 @@ The premium is not the wealth &mdash; the compounded shares are.</div>
     document.getElementById('spyBpsAmt').textContent    = empty ? '—' : fmt(spyBpsAmt);
     document.getElementById('qqqBpsAmt').textContent    = empty ? '—' : fmt(qqqBpsAmt);
 
-    const sp = (n, pct) => empty ? '— of total' : Math.round(pct * 100) + '% of total';
-    document.getElementById('spyCorePct').textContent  = sp(spyCoreAmt,  corePct * spyRatio);
-    document.getElementById('qqqCorePct').textContent  = sp(qqqCoreAmt,  corePct * qqqRatio);
-    document.getElementById('spyWheelPct').textContent = sp(spyWheelAmt, wheelPct * spyRatio);
-    document.getElementById('qqqWheelPct').textContent = sp(qqqWheelAmt, wheelPct * qqqRatio);
-    document.getElementById('spyBpsPct').textContent   = sp(spyBpsAmt,   bpsPct * spyRatio);
-    document.getElementById('qqqBpsPct').textContent   = sp(qqqBpsAmt,   bpsPct * qqqRatio);
+    const sp = (pct) => empty ? '— of total' : Math.round(pct * 100) + '% of total';
+    document.getElementById('spyCorePct').textContent  = sp(corePct  * spyRatio);
+    document.getElementById('qqqCorePct').textContent  = sp(corePct  * qqqRatio);
+    document.getElementById('spyWheelPct').textContent = sp(wheelPct * spyRatio);
+    document.getElementById('qqqWheelPct').textContent = sp(wheelPct * qqqRatio);
+    document.getElementById('spyBpsPct').textContent   = sp(bpsPct   * spyRatio);
+    document.getElementById('qqqBpsPct').textContent   = sp(bpsPct   * qqqRatio);
 
-    // --- Share detail text ---
     if (empty) {
       ['spyCoreShares','qqqCoreShares','spyWheelShares','qqqWheelShares','spyBpsSpreads','qqqBpsSpreads'].forEach(id => {
         document.getElementById(id).innerHTML = 'Enter capital above';
@@ -455,20 +491,18 @@ The premium is not the wealth &mdash; the compounded shares are.</div>
       document.getElementById('qqqBpsSpreads').innerHTML  = `~<span>${qqqBpsSpreads} spreads</span> @ $1,500 collateral each`;
     }
 
-    // --- Wheel warnings ---
     document.getElementById('spyWheelWarn').textContent = (!empty && spyWheelShares < 100)
       ? '⚠️ Need 100 shares for 1 CC. Build via put assignment first.' : '';
     document.getElementById('qqqWheelWarn').textContent = (!empty && qqqWheelShares < 100)
       ? '⚠️ Need 100 shares for 1 CC. Build via put assignment first.' : '';
 
-    // --- Allocation bar ---
     const segs = [
-      { id: 'barCoreSpy',   pct: corePct  * spyRatio * 100, label: 'SPY Core' },
-      { id: 'barCoreQqq',   pct: corePct  * qqqRatio * 100, label: 'QQQ Core' },
-      { id: 'barWheelSpy',  pct: wheelPct * spyRatio * 100, label: 'SPY Wheel' },
-      { id: 'barWheelQqq',  pct: wheelPct * qqqRatio * 100, label: 'QQQ Wheel' },
-      { id: 'barBpsSpy',    pct: bpsPct   * spyRatio * 100, label: 'SPY BPS' },
-      { id: 'barBpsQqq',    pct: bpsPct   * qqqRatio * 100, label: 'QQQ BPS' },
+      { id: 'barCoreSpy',  pct: corePct  * spyRatio * 100, label: 'SPY Core' },
+      { id: 'barCoreQqq',  pct: corePct  * qqqRatio * 100, label: 'QQQ Core' },
+      { id: 'barWheelSpy', pct: wheelPct * spyRatio * 100, label: 'SPY Wheel' },
+      { id: 'barWheelQqq', pct: wheelPct * qqqRatio * 100, label: 'QQQ Wheel' },
+      { id: 'barBpsSpy',   pct: bpsPct   * spyRatio * 100, label: 'SPY BPS' },
+      { id: 'barBpsQqq',   pct: bpsPct   * qqqRatio * 100, label: 'QQQ BPS' },
     ];
     segs.forEach(s => {
       const el = document.getElementById(s.id);
@@ -476,11 +510,6 @@ The premium is not the wealth &mdash; the compounded shares are.</div>
       el.textContent = s.pct >= 8 ? s.label : '';
     });
 
-    // --- Income estimates ---
-    // SPY CC: ~$2.50–3.50 per contract per 45-day cycle (~monthly)
-    // QQQ CC: ~$3.50–5.00 per contract
-    // SPY BPS 15-wide: ~$3.00–4.00 per spread per cycle
-    // QQQ BPS 15-wide: ~$3.50–4.50 per spread
     const incSpyWheelLo = spyCCContracts * 250;
     const incSpyWheelHi = spyCCContracts * 350;
     const incQqqWheelLo = qqqCCContracts * 350;
@@ -489,7 +518,6 @@ The premium is not the wealth &mdash; the compounded shares are.</div>
     const incSpyBpsHi   = spyBpsSpreads  * 400;
     const incQqqBpsLo   = qqqBpsSpreads  * 350;
     const incQqqBpsHi   = qqqBpsSpreads  * 450;
-
     const totalLo = incSpyWheelLo + incQqqWheelLo + incSpyBpsLo + incQqqBpsLo;
     const totalHi = incSpyWheelHi + incQqqWheelHi + incSpyBpsHi + incQqqBpsHi;
 
@@ -512,10 +540,35 @@ The premium is not the wealth &mdash; the compounded shares are.</div>
     document.getElementById('incTotalHi').textContent     = fmtInc(totalHi);
   }
 
-  // --- Init ---
+  // --- Wire up capital input to also save ---
+  document.getElementById('totalCapital').addEventListener('input', function() {
+    recalculate();
+    saveSettings();
+  });
+
+  document.getElementById('spyQqqSlider').addEventListener('input', function() {
+    updateSpyLabel();
+    recalculate();
+    saveSettings();
+  });
+
+  // --- Init: load saved settings, then render ---
+  const loaded = loadSettings();
   updateSliderDisplays();
   updateSpyLabel();
   recalculate();
+
+  if (loaded) {
+    const el = document.getElementById('saveIndicator');
+    el.textContent = '✓ Settings restored';
+    el.style.color = '#68d391';
+    setTimeout(() => {
+      el.textContent = '— settings auto-saved';
+      el.style.color = '#4a5568';
+    }, 2500);
+  } else {
+    document.getElementById('saveIndicator').textContent = '— settings auto-saved';
+  }
 </script>
 </body>
 </html>

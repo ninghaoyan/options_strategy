@@ -241,21 +241,97 @@
 
   <!-- INCOME ESTIMATE -->
   <div class="card">
-    <h2>&#128176; Estimated Monthly Income</h2>
-    <p style="font-size:0.77rem; color:#718096; margin-bottom:14px;">Based on VIX ~24 conditions. Reinvest all premium into Core shares.</p>
+    <h2>&#128176; Monthly Income Calculator</h2>
+    <p style="font-size:0.77rem; color:#718096; margin-bottom:4px;">Enter the <strong>actual net credit per spread/contract</strong> from your broker's live options chain.</p>
+    <p style="font-size:0.72rem; color:#4a5568; margin-bottom:16px;">How to find it: Open options chain &rarr; find your strike (delta 0.15&ndash;0.25) &rarr; read net credit shown &rarr; enter below.</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+      <div>
+        <div style="font-size:0.72rem; font-weight:700; color:#63b3ed; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">SPY BPS &mdash; Net Credit / Spread</div>
+        <div style="position:relative;">
+          <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#63b3ed; font-weight:700; font-size:0.85rem; pointer-events:none;">$</span>
+          <input type="number" id="spyBpsPremium" placeholder="e.g. 3.50" min="0" step="0.05"
+            style="background:#252d3d; border:1px solid #4a5568; border-radius:8px; color:#e2e8f0; font-size:0.95rem; font-weight:700; padding:9px 12px 9px 24px; width:100%; outline:none;"
+            oninput="updateIncome(); saveSettings();" />
+        </div>
+      </div>
+      <div>
+        <div style="font-size:0.72rem; font-weight:700; color:#b794f4; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">QQQ BPS &mdash; Net Credit / Spread</div>
+        <div style="position:relative;">
+          <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#b794f4; font-weight:700; font-size:0.85rem; pointer-events:none;">$</span>
+          <input type="number" id="qqqBpsPremium" placeholder="e.g. 4.00" min="0" step="0.05"
+            style="background:#252d3d; border:1px solid #4a5568; border-radius:8px; color:#e2e8f0; font-size:0.95rem; font-weight:700; padding:9px 12px 9px 24px; width:100%; outline:none;"
+            oninput="updateIncome(); saveSettings();" />
+        </div>
+      </div>
+      <div>
+        <div style="font-size:0.72rem; font-weight:700; color:#f6ad55; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">SPY CC &mdash; Net Premium / Contract</div>
+        <div style="position:relative;">
+          <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#f6ad55; font-weight:700; font-size:0.85rem; pointer-events:none;">$</span>
+          <input type="number" id="spyCcPremium" placeholder="e.g. 2.80" min="0" step="0.05"
+            style="background:#252d3d; border:1px solid #4a5568; border-radius:8px; color:#e2e8f0; font-size:0.95rem; font-weight:700; padding:9px 12px 9px 24px; width:100%; outline:none;"
+            oninput="updateIncome(); saveSettings();" />
+        </div>
+      </div>
+      <div>
+        <div style="font-size:0.72rem; font-weight:700; color:#ed8936; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">QQQ CC &mdash; Net Premium / Contract</div>
+        <div style="position:relative;">
+          <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#ed8936; font-weight:700; font-size:0.85rem; pointer-events:none;">$</span>
+          <input type="number" id="qqqCcPremium" placeholder="e.g. 3.50" min="0" step="0.05"
+            style="background:#252d3d; border:1px solid #4a5568; border-radius:8px; color:#e2e8f0; font-size:0.95rem; font-weight:700; padding:9px 12px 9px 24px; width:100%; outline:none;"
+            oninput="updateIncome(); saveSettings();" />
+        </div>
+      </div>
+    </div>
+
     <table>
       <tr>
-        <th>Source</th><th>Capital</th><th>Est. Monthly (Low)</th><th>Est. Monthly (High)</th>
+        <th>Source</th>
+        <th>Contracts / Spreads</th>
+        <th>Net Credit</th>
+        <th>Monthly Income</th>
       </tr>
-      <tr><td>SPY Wheel CC</td><td id="incSpyWheelCap">—</td><td id="incSpyWheelLo">—</td><td id="incSpyWheelHi">—</td></tr>
-      <tr><td>QQQ Wheel CC</td><td id="incQqqWheelCap">—</td><td id="incQqqWheelLo">—</td><td id="incQqqWheelHi">—</td></tr>
-      <tr><td>SPY BPS</td><td id="incSpyBpsCap">—</td><td id="incSpyBpsLo">—</td><td id="incSpyBpsHi">—</td></tr>
-      <tr><td>QQQ BPS</td><td id="incQqqBpsCap">—</td><td id="incQqqBpsLo">—</td><td id="incQqqBpsHi">—</td></tr>
+      <tr>
+        <td>SPY Wheel CC</td>
+        <td id="incSpyCcCount">—</td>
+        <td id="incSpyCcCredit">—</td>
+        <td id="incSpyCcTotal" style="font-weight:600; color:#f6ad55;">—</td>
+      </tr>
+      <tr>
+        <td>QQQ Wheel CC</td>
+        <td id="incQqqCcCount">—</td>
+        <td id="incQqqCcCredit">—</td>
+        <td id="incQqqCcTotal" style="font-weight:600; color:#ed8936;">—</td>
+      </tr>
+      <tr>
+        <td>SPY BPS</td>
+        <td id="incSpyBpsCount">—</td>
+        <td id="incSpyBpsCredit">—</td>
+        <td id="incSpyBpsTotal" style="font-weight:600; color:#63b3ed;">—</td>
+      </tr>
+      <tr>
+        <td>QQQ BPS</td>
+        <td id="incQqqBpsCount">—</td>
+        <td id="incQqqBpsCredit">—</td>
+        <td id="incQqqBpsTotal" style="font-weight:600; color:#b794f4;">—</td>
+      </tr>
       <tr class="total-row">
-        <td><strong>Total estimated</strong></td><td id="incTotalCap">—</td><td id="incTotalLo">—</td><td id="incTotalHi">—</td>
+        <td><strong>Total per cycle</strong></td>
+        <td>—</td>
+        <td>—</td>
+        <td id="incGrandTotal">—</td>
       </tr>
     </table>
-    <p style="margin-top:10px; font-size:0.72rem; color:#718096;">&#9888; Reinvest all premium income into Core shares for maximum long-term compounding.</p>
+
+    <div style="background:#252d3d; border-radius:8px; padding:12px; margin-top:14px;">
+      <div style="font-size:0.72rem; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Annualised Estimate</div>
+      <div style="display:flex; gap:20px; flex-wrap:wrap;">
+        <div><div style="font-size:0.7rem; color:#718096;">8 cycles/year (50% rule avg)</div><div style="font-size:1rem; font-weight:700; color:#68d391;" id="annualLo">—</div></div>
+        <div><div style="font-size:0.7rem; color:#718096;">10 cycles/year (fast market)</div><div style="font-size:1rem; font-weight:700; color:#68d391;" id="annualHi">—</div></div>
+      </div>
+    </div>
+
+    <p style="margin-top:12px; font-size:0.72rem; color:#4a5568;">&#9888; Enter live chain premiums for accurate figures. Leave any field blank to exclude that source. Reinvest all income into Core shares.</p>
   </div>
 
   <!-- RATIONALE -->
@@ -298,11 +374,15 @@ The premium is not the wealth &mdash; the shares are.</div>
   function saveSettings() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        capital: document.getElementById('totalCapital').value,
-        spyQqq:  document.getElementById('spyQqqSlider').value,
-        core:    document.getElementById('coreSlider').value,
-        wheel:   document.getElementById('wheelSlider').value,
-        bps:     document.getElementById('bpsSlider').value,
+        capital:      document.getElementById('totalCapital').value,
+        spyQqq:       document.getElementById('spyQqqSlider').value,
+        core:         document.getElementById('coreSlider').value,
+        wheel:        document.getElementById('wheelSlider').value,
+        bps:          document.getElementById('bpsSlider').value,
+        spyBpsPremium: document.getElementById('spyBpsPremium').value,
+        qqqBpsPremium: document.getElementById('qqqBpsPremium').value,
+        spyCcPremium:  document.getElementById('spyCcPremium').value,
+        qqqCcPremium:  document.getElementById('qqqCcPremium').value,
       }));
       showSaved('&#10003; Saved');
     } catch(e) {}
@@ -320,11 +400,15 @@ The premium is not the wealth &mdash; the shares are.</div>
     try {
       const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
       if (!s) return false;
-      if (s.capital) document.getElementById('totalCapital').value  = s.capital;
-      if (s.spyQqq)  document.getElementById('spyQqqSlider').value  = s.spyQqq;
-      if (s.core)    document.getElementById('coreSlider').value    = s.core;
-      if (s.wheel)   document.getElementById('wheelSlider').value   = s.wheel;
-      if (s.bps)     document.getElementById('bpsSlider').value     = s.bps;
+      if (s.capital)       document.getElementById('totalCapital').value  = s.capital;
+      if (s.spyQqq)        document.getElementById('spyQqqSlider').value  = s.spyQqq;
+      if (s.core)          document.getElementById('coreSlider').value    = s.core;
+      if (s.wheel)         document.getElementById('wheelSlider').value   = s.wheel;
+      if (s.bps)           document.getElementById('bpsSlider').value     = s.bps;
+      if (s.spyBpsPremium) document.getElementById('spyBpsPremium').value = s.spyBpsPremium;
+      if (s.qqqBpsPremium) document.getElementById('qqqBpsPremium').value = s.qqqBpsPremium;
+      if (s.spyCcPremium)  document.getElementById('spyCcPremium').value  = s.spyCcPremium;
+      if (s.qqqCcPremium)  document.getElementById('qqqCcPremium').value  = s.qqqCcPremium;
       return true;
     } catch(e) { return false; }
   }
@@ -424,26 +508,61 @@ The premium is not the wealth &mdash; the shares are.</div>
       seg.textContent = (p*100) >= 8 ? lbl : '';
     });
 
-    const fi = n => e ? '—' : '$' + n.toLocaleString();
-    const swLo=spyCC*250, swHi=spyCC*350, qwLo=qqqCC*350, qwHi=qqqCC*500;
-    const sbLo=spyBpsSpreads*300, sbHi=spyBpsSpreads*400;
-    const qbLo=qqqBpsSpreads*350, qbHi=qqqBpsSpreads*450;
-    const tLo=swLo+qwLo+sbLo+qbLo, tHi=swHi+qwHi+sbHi+qbHi;
-    document.getElementById('incSpyWheelCap').textContent=e?'—':fmt(spyWheelAmt);
-    document.getElementById('incSpyWheelLo').textContent=fi(swLo);
-    document.getElementById('incSpyWheelHi').textContent=fi(swHi);
-    document.getElementById('incQqqWheelCap').textContent=e?'—':fmt(qqqWheelAmt);
-    document.getElementById('incQqqWheelLo').textContent=fi(qwLo);
-    document.getElementById('incQqqWheelHi').textContent=fi(qwHi);
-    document.getElementById('incSpyBpsCap').textContent=e?'—':fmt(spyBpsAmt);
-    document.getElementById('incSpyBpsLo').textContent=fi(sbLo);
-    document.getElementById('incSpyBpsHi').textContent=fi(sbHi);
-    document.getElementById('incQqqBpsCap').textContent=e?'—':fmt(qqqBpsAmt);
-    document.getElementById('incQqqBpsLo').textContent=fi(qbLo);
-    document.getElementById('incQqqBpsHi').textContent=fi(qbHi);
-    document.getElementById('incTotalCap').textContent=e?'—':fmt(spyWheelAmt+qqqWheelAmt+spyBpsAmt+qqqBpsAmt);
-    document.getElementById('incTotalLo').textContent=fi(tLo);
-    document.getElementById('incTotalHi').textContent=fi(tHi);
+    // Income
+    updateIncome();
+  }
+
+  function updateIncome() {
+    const totalRaw   = parseFloat(document.getElementById('totalCapital').value);
+    const total      = isNaN(totalRaw) || totalRaw <= 0 ? 0 : totalRaw;
+    const wheelPct   = parseInt(document.getElementById('wheelSlider').value) / 100;
+    const bpsPct     = parseInt(document.getElementById('bpsSlider').value)   / 100;
+    const spyR       = parseInt(document.getElementById('spyQqqSlider').value) / 100;
+    const qqqR       = 1 - spyR;
+
+    const spyWheelShares = Math.floor(total * wheelPct * spyR / SPY_PRICE);
+    const qqqWheelShares = Math.floor(total * wheelPct * qqqR / QQQ_PRICE);
+    const spyCC          = Math.floor(spyWheelShares / 100);
+    const qqqCC          = Math.floor(qqqWheelShares / 100);
+    const spyBpsSpreads  = Math.floor(total * bpsPct * spyR / 1500);
+    const qqqBpsSpreads  = Math.floor(total * bpsPct * qqqR / 1500);
+
+    const spyCcPrem  = parseFloat(document.getElementById('spyCcPremium').value);
+    const qqqCcPrem  = parseFloat(document.getElementById('qqqCcPremium').value);
+    const spyBpsPrem = parseFloat(document.getElementById('spyBpsPremium').value);
+    const qqqBpsPrem = parseFloat(document.getElementById('qqqBpsPremium').value);
+
+    const hasSpyCc  = !isNaN(spyCcPrem)  && spyCcPrem  > 0;
+    const hasQqqCc  = !isNaN(qqqCcPrem)  && qqqCcPrem  > 0;
+    const hasSpyBps = !isNaN(spyBpsPrem) && spyBpsPrem > 0;
+    const hasQqqBps = !isNaN(qqqBpsPrem) && qqqBpsPrem > 0;
+
+    document.getElementById('incSpyCcCount').textContent  = total > 0 ? spyCC + ' contracts'       : '—';
+    document.getElementById('incQqqCcCount').textContent  = total > 0 ? qqqCC + ' contracts'       : '—';
+    document.getElementById('incSpyBpsCount').textContent = total > 0 ? spyBpsSpreads + ' spreads' : '—';
+    document.getElementById('incQqqBpsCount').textContent = total > 0 ? qqqBpsSpreads + ' spreads' : '—';
+
+    document.getElementById('incSpyCcCredit').textContent  = hasSpyCc  ? '$' + spyCcPrem.toFixed(2)  : '— enter above';
+    document.getElementById('incQqqCcCredit').textContent  = hasQqqCc  ? '$' + qqqCcPrem.toFixed(2)  : '— enter above';
+    document.getElementById('incSpyBpsCredit').textContent = hasSpyBps ? '$' + spyBpsPrem.toFixed(2) : '— enter above';
+    document.getElementById('incQqqBpsCredit').textContent = hasQqqBps ? '$' + qqqBpsPrem.toFixed(2) : '— enter above';
+
+    const spyCcInc  = hasSpyCc  && total > 0 ? spyCC          * spyCcPrem  * 100 : null;
+    const qqqCcInc  = hasQqqCc  && total > 0 ? qqqCC          * qqqCcPrem  * 100 : null;
+    const spyBpsInc = hasSpyBps && total > 0 ? spyBpsSpreads  * spyBpsPrem * 100 : null;
+    const qqqBpsInc = hasQqqBps && total > 0 ? qqqBpsSpreads  * qqqBpsPrem * 100 : null;
+
+    document.getElementById('incSpyCcTotal').textContent  = spyCcInc  !== null ? '$' + Math.round(spyCcInc).toLocaleString()  : '—';
+    document.getElementById('incQqqCcTotal').textContent  = qqqCcInc  !== null ? '$' + Math.round(qqqCcInc).toLocaleString()  : '—';
+    document.getElementById('incSpyBpsTotal').textContent = spyBpsInc !== null ? '$' + Math.round(spyBpsInc).toLocaleString() : '—';
+    document.getElementById('incQqqBpsTotal').textContent = qqqBpsInc !== null ? '$' + Math.round(qqqBpsInc).toLocaleString() : '—';
+
+    const parts = [spyCcInc, qqqCcInc, spyBpsInc, qqqBpsInc].filter(x => x !== null);
+    const grandTotal = parts.length > 0 ? parts.reduce((a, b) => a + b, 0) : null;
+
+    document.getElementById('incGrandTotal').textContent = grandTotal !== null ? '$' + Math.round(grandTotal).toLocaleString() : '—';
+    document.getElementById('annualLo').textContent = grandTotal !== null ? '$' + Math.round(grandTotal * 8).toLocaleString()  + '/yr' : '—';
+    document.getElementById('annualHi').textContent = grandTotal !== null ? '$' + Math.round(grandTotal * 10).toLocaleString() + '/yr' : '—';
   }
 
   document.getElementById('totalCapital').addEventListener('input', () => { update(); saveSettings(); });
@@ -451,6 +570,7 @@ The premium is not the wealth &mdash; the shares are.</div>
 
   const loaded = loadSettings();
   update();
+  updateIncome();
   if (loaded) {
     const el = document.getElementById('saveIndicator');
     el.innerHTML = '&#10003; Settings restored';

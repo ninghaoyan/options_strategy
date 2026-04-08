@@ -113,12 +113,13 @@
 
   <div class="card">
     <h2>&#9888;&#65039; Universal Rules — Apply to Every Strategy Below</h2>
-    <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>DTE: Always enter at 45 days.</strong> Not 30, not 21. You need the full runway before the 21 DTE hard-close trigger.</div></div>
-    <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>GTC at 50% profit — set immediately on entry.</strong> Every single trade, without exception. This is your auto-pilot profit-take.</div></div>
-    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>21 DTE hard close — no exceptions.</strong> Close or roll at 21 DTE regardless of profit or loss. Gamma dominates inside this window.</div></div>
-    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>Stop loss at 2&times; premium collected.</strong> Collected $3.00 &rarr; close if position costs $9.00 to exit. Never let losses run past this.</div></div>
-    <div class="rule-box"><div class="rule-num">5</div><div class="rule-text"><strong>VIX &gt; 35 &rarr; pause ALL new positions.</strong> No SPY, no QQQ, no CC, no puts, no BPS. Market dislocation — wait for calm.</div></div>
-    <div class="rule-box"><div class="rule-num">6</div><div class="rule-text"><strong>No new positions the week before Fed, CPI, or major earnings.</strong> QQQ strategies: also avoid big-tech earnings weeks (AAPL, MSFT, NVDA, META, AMZN, GOOGL).</div></div>
+    <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>CC and BPS: Always enter at 45 DTE.</strong> You need the full runway before the 21 DTE hard-close trigger. Never sell below 30 DTE.</div></div>
+    <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>Sell Put DTE depends on your goal.</strong> Income-focused &rarr; 45 DTE (50% GTC + 21 DTE close apply). Assignment-focused &rarr; 21&ndash;30 DTE (no GTC, no 21 DTE close &mdash; hold to expiry). See each Sell Put tab for full detail.</div></div>
+    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>GTC at 50% profit — income trades only.</strong> Set immediately on CC, BPS, and income-focused puts. Not applicable to assignment-focused puts.</div></div>
+    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>21 DTE hard close — CC and BPS only.</strong> Close or roll at 21 DTE regardless of profit or loss. Gamma dominates inside this window. Not applicable to assignment-focused puts.</div></div>
+    <div class="rule-box"><div class="rule-num">5</div><div class="rule-text"><strong>Stop loss at 2&times; premium collected.</strong> Hard rule for CC and BPS. Soft reassessment trigger for assignment-focused puts &mdash; ask: do I still want these shares at this price in this market?</div></div>
+    <div class="rule-box"><div class="rule-num">6</div><div class="rule-text"><strong>VIX &gt; 35 &rarr; pause ALL new positions.</strong> No SPY, no QQQ, no CC, no puts, no BPS. Market dislocation — wait for calm.</div></div>
+    <div class="rule-box"><div class="rule-num">7</div><div class="rule-text"><strong>No new positions the week before Fed, CPI, or major earnings.</strong> QQQ strategies: also avoid big-tech earnings weeks (AAPL, MSFT, NVDA, META, AMZN, GOOGL).</div></div>
   </div>
 
   <div class="card">
@@ -252,81 +253,126 @@ One-line test: "Am I genuinely happy selling these shares at $610?"
 
 <!-- SPY SELL PUT -->
 <div id="spy-put" class="content">
+
   <div class="card">
     <div class="strategy-header">
       <span class="strategy-badge sb-spy">SPY</span>
       <span class="strategy-badge sb-put">Sell Put</span>
     </div>
-    <h2>&#127919; Strike Criteria</h2>
-    <div class="highlight">Goal: Income generation + disciplined dip buying
-      The strike IS your target buy price for SPY shares
-
-Delta:        0.15&ndash;0.20 (short put)
-OTM%:         See VIX table below
-DTE:          45 days
-Strike floor: A price you genuinely want to own 100 SPY shares at
-              This is your dip-buying discipline &mdash; not just a number
-
-VIX adjustment:
-  VIX &lt;18   &rarr; 5&ndash;7% below SPY
-  VIX 18&ndash;25 &rarr; 8&ndash;10% below SPY  (current conditions)
-  VIX 25&ndash;35 &rarr; 10&ndash;12% below SPY
-  VIX &gt;35   &rarr; Pause &mdash; no new put positions
-
-GTC:          50% profit &mdash; set immediately on entry
-21 DTE:       Hard close or roll &mdash; no exceptions
-Stop loss:    Close if loss = 2&times; premium collected
-Assignment:   100 SPY shares &rarr; decide bucket placement:
-              Bought at real dip? &rarr; Core bucket
-              Fair value entry?   &rarr; Wheel bucket</div>
-
-    <h3>Example (SPY $555, VIX ~22)</h3>
-    <div class="highlight">9% OTM &rarr; $555 &times; 0.91 = $505 strike
-Delta check:  should be ~0.17&ndash;0.20
-Premium:      ~$4.00&ndash;5.50/contract
-GTC:          set at $2.00&ndash;2.75 (50%)
-Effective buy price if assigned: $505 &ndash; $4.50 = $500.50
-
-One-line test: "Would I happily own 100 more SPY at $505?"
-               If yes &rarr; sell this put.</div>
-  </div>
-
-  <div class="card">
-    <h2>&#128260; The Dual Purpose of Put Selling</h2>
-    <div class="highlight">Your sell put strategy serves TWO goals simultaneously:
-
-Goal 1 &mdash; Income (primary):
-  SPY stays above $505 &rarr; premium decays &rarr; GTC fires
-  Pocket income, redeploy, repeat ✅
-
-Goal 2 &mdash; Dip buying (bonus):
-  Instead of waiting and guessing when to buy the dip:
-  &rarr; Sell put at your target dip price ($505)
-  &rarr; If SPY falls there &rarr; assigned at your exact target
-  &rarr; Effective cost = $505 &ndash; premium = even cheaper ✅
-  &rarr; If SPY doesn't fall &rarr; kept premium as consolation ✅
-
-This eliminates the emotional "should I buy now?" question.
-You pre-commit to your buy price via the put strike.</div>
-
-    <div class="quote">
-      <p>"You're not trying to time the dip &mdash; you're getting paid to wait for it at a price you already decided you want."</p>
+    <h2>&#128260; Two Modes &mdash; Choose Before You Trade</h2>
+    <p style="margin-bottom:12px; font-size:0.8rem; color:#a0aec0;">Your intent determines the entire setup. Decide which mode you're in before placing the order &mdash; they use different DTE, different management rules, and different GTC behaviour.</p>
+    <div class="two-col">
+      <div class="bucket-card core">
+        <div class="bucket-tag">Mode 1 &mdash; Income</div>
+        <h4>&#128176; Collect Premium</h4>
+        <p>Goal is to close at 50% profit and redeploy. Assignment is incidental &mdash; goes to Wheel bucket if it happens.</p>
+      </div>
+      <div class="bucket-card wheel">
+        <div class="bucket-tag">Mode 2 &mdash; Assignment</div>
+        <h4>&#127919; Buy the Dip</h4>
+        <p>Goal is to be assigned at your target price. Hold to expiry intentionally. Goes straight to Core bucket on assignment.</p>
+      </div>
     </div>
   </div>
 
   <div class="card">
-    <h2>&#128203; Assignment Decision — Which Bucket?</h2>
+    <h2>&#128176; Mode 1 &mdash; Income-Focused Put</h2>
+    <div class="highlight">Goal: Collect premium efficiently, close early, redeploy
+      Assignment is coincidental &mdash; not the plan
+
+Delta:        0.15&ndash;0.20
+OTM%:         See VIX table below
+DTE:          45 days  (need runway before 21 DTE trigger)
+Strike floor: A price you'd be OK owning SPY at if assigned
+
+VIX adjustment:
+  VIX &lt;18   &rarr; 5&ndash;7% below SPY
+  VIX 18&ndash;25 &rarr; 8&ndash;10% below SPY
+  VIX 25&ndash;35 &rarr; 10&ndash;12% below SPY
+  VIX &gt;35   &rarr; Pause
+
+GTC:          50% profit &mdash; set immediately on entry ✅
+21 DTE:       Hard close or roll &mdash; no exceptions ✅
+Stop loss:    Close if loss = 2&times; premium collected
+Assignment:   Incidental &rarr; Wheel bucket</div>
+
+    <h3>Example (SPY $555, VIX ~22, Mode 1)</h3>
+    <div class="highlight">9% OTM &rarr; $555 &times; 0.91 = $505 strike, 45 DTE
+Premium:      ~$4.00&ndash;5.50/contract
+GTC:          set at $2.00&ndash;2.75 (50%) immediately
+If assigned:  100 SPY shares &rarr; Wheel bucket &rarr; sell CC</div>
+  </div>
+
+  <div class="card">
+    <h2>&#127919; Mode 2 &mdash; Assignment-Focused Put</h2>
+    <div class="highlight">Goal: Get assigned at your target dip price for Core bucket
+      You WANT to own these 100 SPY shares long-term
+
+Delta:        0.20&ndash;0.30  (higher delta = more likely to be assigned)
+OTM%:         Place at your specific target buy price
+              Not a % rule &mdash; pick the price YOU want to own SPY at
+DTE:          21&ndash;30 days  (shorter &mdash; faster assignment, faster reassessment)
+Strike floor: Must be a price you'd be happy holding for years
+
+GTC:          NOT needed &mdash; you want to hold to expiry ❌
+21 DTE:       NOT a close trigger &mdash; you're watching for assignment ❌
+Stop loss:    Soft reassessment only &mdash; if SPY is in freefall,
+              ask: "Do I still want SPY at this price right now?"
+              Close and re-enter at a lower strike if market is breaking down
+Assignment:   The whole point &rarr; Core bucket &rarr; hold long-term
+If expires worthless: Re-sell immediately at same strike next cycle</div>
+
+    <h3>Example (SPY $555, VIX ~22, Mode 2)</h3>
+    <div class="highlight">You want to buy SPY at $500 (a genuine dip target)
+  &rarr; Sell SPY $500 put, 21&ndash;30 DTE
+  &rarr; Collect ~$2.50&ndash;3.50 premium
+  &rarr; No GTC order needed &mdash; just monitor
+
+SPY falls to $495 &rarr; assigned 100 shares at $500 ✅
+Effective cost: $500 &ndash; $3.00 = $497 &rarr; Core bucket
+
+SPY stays above $500 &rarr; expires worthless
+Keep $300 premium &rarr; sell again next 21&ndash;30 DTE cycle
+Repeat until assigned at your target price</div>
+
+    <div class="decision-node yellow">
+      <div class="label">&#9888; Why Shorter DTE for Assignment Mode?</div>
+      <div class="action">If SPY is going to dip to your level, it typically happens within 3&ndash;4 weeks &mdash; not 6 weeks. Shorter cycles let you reassess your target price more frequently. If SPY rallies away from your strike, you can adjust without being locked into a 45-day commitment. Premium per cycle is lower, but similar annualised since you cycle twice as often.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#128203; Side-by-Side Comparison</h2>
     <table>
-      <tr><th>Scenario</th><th>Bucket</th><th>Next Action</th></tr>
-      <tr><td>Assigned at a genuine dip (SPY down 10%+)</td><td><span class="badge badge-green">Core</span></td><td>Hold long-term, no CC yet</td></tr>
-      <tr><td>Assigned at fair value (SPY down 5–8%)</td><td><span class="badge badge-yellow">Wheel</span></td><td>Sell covered call immediately</td></tr>
-      <tr><td>Assigned, SPY still falling</td><td><span class="badge badge-yellow">Wheel</span></td><td>Sell CC or wait for bounce</td></tr>
-      <tr><td>50% profit hit, not assigned</td><td>N/A</td><td>Close, sell new put next cycle</td></tr>
+      <tr><th>Rule</th><th>Mode 1 &mdash; Income</th><th>Mode 2 &mdash; Assignment</th></tr>
+      <tr><td>DTE</td><td>45 days</td><td>21&ndash;30 days</td></tr>
+      <tr><td>Delta</td><td>0.15&ndash;0.20</td><td>0.20&ndash;0.30</td></tr>
+      <tr><td>Strike choice</td><td>OTM% based on VIX</td><td>Your specific target buy price</td></tr>
+      <tr><td>GTC at 50%</td><td><span class="badge badge-green">&#10003; Set immediately</span></td><td><span class="badge badge-red">&#10007; Not used</span></td></tr>
+      <tr><td>21 DTE close</td><td><span class="badge badge-green">&#10003; Hard rule</span></td><td><span class="badge badge-red">&#10007; Not applicable</span></td></tr>
+      <tr><td>Stop loss</td><td>Hard at 2&times; premium</td><td>Soft &mdash; reassess only</td></tr>
+      <tr><td>If assigned</td><td>Wheel bucket</td><td>Core bucket</td></tr>
+      <tr><td>If expires worthless</td><td>Redeploy next cycle</td><td>Re-sell same strike immediately</td></tr>
+      <tr><td>Premium per cycle</td><td>Higher (~$4&ndash;5)</td><td>Lower (~$2.50&ndash;3.50)</td></tr>
+      <tr><td>Cycles per 45 days</td><td>~1</td><td>~1.5&ndash;2</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>&#128203; Assignment Decision &mdash; Which Bucket?</h2>
+    <table>
+      <tr><th>Scenario</th><th>Mode</th><th>Bucket</th><th>Next Action</th></tr>
+      <tr><td>Assigned at genuine dip (SPY down 10%+)</td><td>Either</td><td><span class="badge badge-green">Core</span></td><td>Hold long-term, no CC</td></tr>
+      <tr><td>Assigned at fair value (Mode 1, incidental)</td><td>Mode 1</td><td><span class="badge badge-yellow">Wheel</span></td><td>Sell covered call immediately</td></tr>
+      <tr><td>Assigned at target price (Mode 2, planned)</td><td>Mode 2</td><td><span class="badge badge-green">Core</span></td><td>Hold long-term, no CC</td></tr>
+      <tr><td>Expires worthless (Mode 1)</td><td>Mode 1</td><td>N/A</td><td>Close at 50% GTC, redeploy</td></tr>
+      <tr><td>Expires worthless (Mode 2)</td><td>Mode 2</td><td>N/A</td><td>Re-sell same strike next cycle</td></tr>
     </table>
   </div>
 
   <div class="card">
     <h2>&#128201; VIX Visual Guide &mdash; SPY Put OTM%</h2>
+    <p style="margin-bottom:10px; font-size:0.77rem; color:#718096;">Applies to Mode 1 strike selection. Mode 2 uses your specific target price, not a VIX-based OTM%.</p>
     <div class="vix-bar">
       <div class="vix-label">VIX &lt;18 (Calm)</div>
       <div class="vix-track"><div class="vix-fill" style="width:25%; background:#68d391;"></div></div>
@@ -549,83 +595,150 @@ One-line test: "Am I genuinely happy selling QQQ at $526?"
 
 <!-- QQQ SELL PUT -->
 <div id="qqq-put" class="content">
+
   <div class="card">
     <div class="strategy-header">
       <span class="strategy-badge sb-qqq">QQQ</span>
       <span class="strategy-badge sb-put">Sell Put</span>
     </div>
-    <h2>&#127919; Strike Criteria</h2>
-    <div class="highlight">Goal: Income + disciplined Nasdaq dip buying
-      Strike = your target buy price for QQQ shares
+    <h2>&#128260; Two Modes &mdash; Choose Before You Trade</h2>
+    <p style="margin-bottom:12px; font-size:0.8rem; color:#a0aec0;">Same two-mode framework as SPY but with one extra layer of discipline: QQQ's tech concentration means macro events and earnings can gap it 4&ndash;5% overnight. Check the calendar before every trade regardless of mode.</p>
+    <div class="two-col">
+      <div class="bucket-card core">
+        <div class="bucket-tag">Mode 1 &mdash; Income</div>
+        <h4>&#128176; Collect Premium</h4>
+        <p>45 DTE, GTC at 50%, 21 DTE close. Assignment incidental &rarr; Wheel bucket. More premium than SPY for same delta.</p>
+      </div>
+      <div class="bucket-card wheel">
+        <div class="bucket-tag">Mode 2 &mdash; Assignment</div>
+        <h4>&#127919; Buy the Dip</h4>
+        <p>21&ndash;30 DTE, no GTC, hold to expiry. Assignment planned &rarr; Core bucket. Re-sell same strike if expires worthless.</p>
+      </div>
+    </div>
+  </div>
 
-Delta:        0.15&ndash;0.20 (short put)
-OTM%:         See VIX table below
+  <div class="card">
+    <h2>&#128176; Mode 1 &mdash; Income-Focused Put</h2>
+    <div class="highlight">Goal: Collect premium efficiently, close at 50%, redeploy
+
+Delta:        0.15&ndash;0.20
+OTM%:         See VIX table below (slightly wider than SPY)
 DTE:          45 days
-Strike floor: A price you genuinely want to own 100 QQQ shares at
+Strike floor: A price you'd be OK owning 100 QQQ at if assigned
 
 VIX adjustment:
-  VIX &lt;18   &rarr; 7&ndash;9% below QQQ  (slightly wider than SPY)
+  VIX &lt;18   &rarr; 7&ndash;9% below QQQ
   VIX 18&ndash;25 &rarr; 10&ndash;12% below QQQ
   VIX 25&ndash;35 &rarr; 12&ndash;15% below QQQ
-  VIX &gt;35   &rarr; Pause &mdash; no new put positions
+  VIX &gt;35   &rarr; Pause
 
 Macro blackout: No new puts the week before:
   Fed &middot; CPI &middot; AAPL, MSFT, NVDA, META, AMZN, GOOGL earnings
-  (A single earnings miss can gap QQQ 4% against you overnight)
 
-GTC:          50% profit &mdash; set immediately
-21 DTE:       Hard close or roll &mdash; no exceptions
+GTC:          50% profit &mdash; set immediately on entry ✅
+21 DTE:       Hard close or roll &mdash; no exceptions ✅
 Stop loss:    Close if loss = 2&times; premium collected
-Assignment:   100 QQQ shares &rarr; decide bucket:
-              Real dip (&gt;10% down) &rarr; Core bucket
-              Fair value (5&ndash;8% down) &rarr; Wheel bucket</div>
+Assignment:   Incidental &rarr; Wheel bucket</div>
 
-    <h3>Example (QQQ $470, VIX ~22)</h3>
-    <div class="highlight">11% OTM &rarr; $470 &times; 0.89 = $418 strike
-Delta check:  should be ~0.17&ndash;0.20
-Premium:      ~$5.00&ndash;7.00/contract (higher than SPY equivalent)
-GTC:          set at $2.50&ndash;3.50 (50%)
-Effective buy price if assigned: $418 &ndash; $6.00 = $412
-
-One-line test: "Would I happily own 100 QQQ at $418?"
-               Is there a major tech earnings event
-               before expiry? If yes &rarr; wait or go wider.</div>
+    <h3>Example (QQQ $470, VIX ~22, Mode 1)</h3>
+    <div class="highlight">11% OTM &rarr; $470 &times; 0.89 = $418 strike, 45 DTE
+Premium:      ~$5.00&ndash;7.00/contract
+GTC:          set at $2.50&ndash;3.50 (50%) immediately
+If assigned:  100 QQQ shares &rarr; Wheel bucket &rarr; sell CC</div>
   </div>
 
   <div class="card">
-    <h2>&#128202; QQQ vs SPY Put Selling &mdash; Premium Comparison</h2>
+    <h2>&#127919; Mode 2 &mdash; Assignment-Focused Put</h2>
+    <div class="highlight">Goal: Get assigned at your Nasdaq dip target for Core bucket
+
+Delta:        0.20&ndash;0.30
+OTM%:         Place at your specific target buy price for QQQ
+DTE:          21&ndash;30 days  (shorter for faster assignment + reassessment)
+Strike floor: A price you'd be happy holding QQQ at for years
+
+Macro blackout: CRITICAL for Mode 2 &mdash; a tech earnings gap
+  can push QQQ through your strike violently, not cleanly.
+  Never open Mode 2 puts in the week before:
+  Fed &middot; CPI &middot; AAPL, MSFT, NVDA, META, AMZN, GOOGL earnings
+
+GTC:          NOT needed &mdash; hold to expiry ❌
+21 DTE:       NOT a close trigger ❌
+Stop loss:    Soft reassessment &mdash; if market is breaking down
+              structurally, close and re-enter at lower strike
+Assignment:   The whole point &rarr; Core bucket &rarr; hold long-term
+If expires worthless: Re-sell same strike next 21&ndash;30 DTE cycle</div>
+
+    <h3>Example (QQQ $470, VIX ~22, Mode 2)</h3>
+    <div class="highlight">You want to own QQQ at $420 (genuine dip target)
+  &rarr; Sell QQQ $420 put, 21&ndash;30 DTE
+  &rarr; Collect ~$3.00&ndash;4.00 premium
+  &rarr; No GTC &mdash; hold and watch
+
+QQQ falls to $415 &rarr; assigned 100 shares at $420 ✅
+Effective cost: $420 &ndash; $3.50 = $416.50 &rarr; Core bucket
+
+QQQ stays above $420 &rarr; expires worthless
+Keep $350 premium &rarr; sell again immediately at same strike</div>
+
+    <div class="decision-node yellow">
+      <div class="label">&#9888; Extra QQQ Caution in Mode 2</div>
+      <div class="action">QQQ can gap 4&ndash;5% in a single session on a big-tech earnings miss. In Mode 2, you're holding through expiry &mdash; a gap can put you deep ITM before you can act. If you open a Mode 2 put and a major tech earnings event is announced before expiry, consider closing early and re-entering after the event clears.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>&#128203; Side-by-Side Comparison</h2>
     <table>
-      <tr><th>Metric</th><th>SPY Put (9% OTM)</th><th>QQQ Put (11% OTM)</th></tr>
+      <tr><th>Rule</th><th>Mode 1 &mdash; Income</th><th>Mode 2 &mdash; Assignment</th></tr>
+      <tr><td>DTE</td><td>45 days</td><td>21&ndash;30 days</td></tr>
+      <tr><td>Delta</td><td>0.15&ndash;0.20</td><td>0.20&ndash;0.30</td></tr>
+      <tr><td>Strike choice</td><td>VIX-based OTM%</td><td>Your specific target buy price</td></tr>
+      <tr><td>GTC at 50%</td><td><span class="badge badge-green">&#10003; Set immediately</span></td><td><span class="badge badge-red">&#10007; Not used</span></td></tr>
+      <tr><td>21 DTE close</td><td><span class="badge badge-green">&#10003; Hard rule</span></td><td><span class="badge badge-red">&#10007; Not applicable</span></td></tr>
+      <tr><td>Stop loss</td><td>Hard at 2&times; premium</td><td>Soft &mdash; reassess only</td></tr>
+      <tr><td>Macro blackout</td><td>Both modes: Fed, CPI, 6 big tech earnings</td><td>Even stricter &mdash; gap risk while holding</td></tr>
+      <tr><td>If assigned</td><td>Wheel bucket</td><td>Core bucket</td></tr>
+      <tr><td>If expires worthless</td><td>Redeploy next cycle</td><td>Re-sell same strike immediately</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>&#128202; QQQ vs SPY Put &mdash; Premium Comparison</h2>
+    <table>
+      <tr><th>Metric</th><th>SPY Put (Mode 1, 9% OTM)</th><th>QQQ Put (Mode 1, 11% OTM)</th></tr>
       <tr><td>Underlying price</td><td>~$555</td><td>~$470</td></tr>
       <tr><td>Strike</td><td>~$505</td><td>~$418</td></tr>
-      <tr><td>Est. premium</td><td>~$4.00&ndash;5.50</td><td>~$5.00&ndash;7.00</td></tr>
+      <tr><td>Est. premium (45 DTE)</td><td>~$4.00&ndash;5.50</td><td>~$5.00&ndash;7.00</td></tr>
       <tr><td>Capital if assigned</td><td>~$50,500</td><td>~$41,800</td></tr>
       <tr><td>ROC on premium</td><td>~0.8&ndash;1.0%</td><td>~1.2&ndash;1.7%</td></tr>
-      <tr><td>Gap risk</td><td>Lower</td><td>Higher (tech events)</td></tr>
-      <tr><td>Macro sensitivity</td><td>Broad economy</td><td>Tech earnings critical</td></tr>
+      <tr><td>Gap risk overnight</td><td>Lower</td><td>Higher (tech earnings)</td></tr>
     </table>
-    <p style="margin-top:8px; font-size:0.75rem; color:#718096;">QQQ offers higher ROC for the same strategy but requires stricter macro blackout discipline. The extra premium is fair compensation for tech earnings volatility.</p>
+    <p style="margin-top:8px; font-size:0.75rem; color:#718096;">QQQ earns more premium for the same strategy &mdash; but the macro blackout discipline is non-negotiable. The extra premium is compensation for tech earnings gap risk, not free money.</p>
   </div>
 
   <div class="card">
-    <h2>&#128260; The Dip-Buying Mechanism &mdash; QQQ Version</h2>
-    <div class="highlight">QQQ dips tend to be sharper but faster-recovering than SPY.
-This makes put selling especially useful:
-
-Scenario: QQQ at $470, you think $420 is a great dip entry
-  &rarr; Sell QQQ $420 put, 45 DTE &rarr; collect $6.00 premium
-
-  QQQ falls to $415:
-    &rarr; Assigned 100 shares at $420
-    &rarr; Effective cost: $420 &ndash; $6 = $414 ✅
-    &rarr; Place in Core bucket if this is a real dip
-
-  QQQ stays above $420:
-    &rarr; Keep $600 premium
-    &rarr; Sell again next cycle at whatever feels like dip ✅
-
-You pre-committed to a buy price AND got paid to wait.
-No emotional "should I buy now?" decision needed.</div>
+    <h2>&#128201; VIX Visual Guide &mdash; QQQ Put OTM% (Mode 1)</h2>
+    <p style="margin-bottom:10px; font-size:0.77rem; color:#718096;">Applies to Mode 1 only. Mode 2 uses your specific target price.</p>
+    <div class="vix-bar">
+      <div class="vix-label">VIX &lt;18 (Calm)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:28%; background:#68d391;"></div></div>
+      <div class="vix-value">7&ndash;9% OTM</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">VIX 18&ndash;25 &#9664; Now</div>
+      <div class="vix-track"><div class="vix-fill" style="width:58%; background:#f6ad55;"></div></div>
+      <div class="vix-value">10&ndash;12% OTM</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">VIX 25&ndash;35 (High)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:82%; background:#fc8181;"></div></div>
+      <div class="vix-value">12&ndash;15% OTM</div>
+    </div>
+    <div class="vix-bar">
+      <div class="vix-label">VIX &gt;35 (Pause)</div>
+      <div class="vix-track"><div class="vix-fill" style="width:100%; background:#742a2a;"></div></div>
+      <div class="vix-value">No new puts</div>
+    </div>
   </div>
 </div>
 
@@ -766,13 +879,22 @@ Mitigation rules:
         <td>&#9989; Welcome</td>
       </tr>
       <tr>
-        <td><span class="badge badge-yellow">SPY Sell Put</span></td>
+        <td><span class="badge badge-yellow">SPY Sell Put (Income)</span></td>
         <td>0.15&ndash;0.20</td>
         <td>8&ndash;10% below</td>
         <td>45</td>
-        <td>50%</td>
-        <td>21 DTE</td>
-        <td>&#9989; Dip buy</td>
+        <td>50% ✅</td>
+        <td>21 DTE ✅</td>
+        <td>&#9989; Wheel bucket</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-yellow">SPY Sell Put (Assignment)</span></td>
+        <td>0.20&ndash;0.30</td>
+        <td>Target price</td>
+        <td>21&ndash;30</td>
+        <td>None ❌</td>
+        <td>None ❌</td>
+        <td>&#9989; Core bucket</td>
       </tr>
       <tr>
         <td><span class="badge badge-red">SPY BPS</span></td>
@@ -802,13 +924,22 @@ Mitigation rules:
         <td>&#9989; Welcome</td>
       </tr>
       <tr>
-        <td><span class="badge badge-yellow">QQQ Sell Put</span></td>
+        <td><span class="badge badge-yellow">QQQ Sell Put (Income)</span></td>
         <td>0.15&ndash;0.20</td>
         <td>10&ndash;12% below</td>
         <td>45</td>
-        <td>50%</td>
-        <td>21 DTE</td>
-        <td>&#9989; Dip buy</td>
+        <td>50% ✅</td>
+        <td>21 DTE ✅</td>
+        <td>&#9989; Wheel bucket</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-yellow">QQQ Sell Put (Assignment)</span></td>
+        <td>0.20&ndash;0.30</td>
+        <td>Target price</td>
+        <td>21&ndash;30</td>
+        <td>None ❌</td>
+        <td>None ❌</td>
+        <td>&#9989; Core bucket</td>
       </tr>
       <tr>
         <td><span class="badge badge-red">QQQ BPS</span></td>
@@ -826,12 +957,14 @@ Mitigation rules:
     <h2>&#127775; One-Line Decision Rule Per Strategy</h2>
     <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>SPY CC Core:</strong> "Would I regret losing these shares at this price?" &mdash; If ANY doubt &rarr; go higher or skip.</div></div>
     <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>SPY CC Wheel:</strong> "Am I genuinely happy exiting at this price?" &mdash; If yes &rarr; sell. Assignment = success.</div></div>
-    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>SPY Sell Put:</strong> "Would I happily own 100 more SPY at this price?" &mdash; If yes &rarr; that's your strike.</div></div>
-    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>SPY BPS:</strong> Same short put test as sell put. Then: "Is my max loss position-sized correctly at 15&ndash;20% of portfolio?"</div></div>
-    <div class="rule-box"><div class="rule-num">5</div><div class="rule-text"><strong>QQQ CC Core:</strong> "Is this strike safely above any realistic near-term QQQ target?" &mdash; Go wider than feels necessary.</div></div>
-    <div class="rule-box"><div class="rule-num">6</div><div class="rule-text"><strong>QQQ CC Wheel:</strong> "Am I happy selling QQQ here, AND is there a tech earnings event before expiry?" &mdash; Both must be clear.</div></div>
-    <div class="rule-box"><div class="rule-num">7</div><div class="rule-text"><strong>QQQ Sell Put:</strong> "Would I happily own 100 QQQ at this price?" &mdash; Then check: any big tech earnings this cycle?</div></div>
-    <div class="rule-box"><div class="rule-num">8</div><div class="rule-text"><strong>QQQ BPS:</strong> Same as QQQ sell put but add: "Have I checked the earnings calendar for all 6 big tech names before expiry?"</div></div>
+    <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>SPY Sell Put (Income):</strong> "Would I be OK owning 100 SPY at this price?" &mdash; 45 DTE, GTC at 50%, close at 21 DTE.</div></div>
+    <div class="rule-box"><div class="rule-num">4</div><div class="rule-text"><strong>SPY Sell Put (Assignment):</strong> "Is this the price I genuinely want to buy SPY at?" &mdash; 21&ndash;30 DTE, no GTC, hold to expiry. Re-sell if it expires worthless.</div></div>
+    <div class="rule-box"><div class="rule-num">5</div><div class="rule-text"><strong>SPY BPS:</strong> Same short put test as income put. Then: "Is my max loss position-sized correctly at 15&ndash;20% of portfolio?"</div></div>
+    <div class="rule-box"><div class="rule-num">6</div><div class="rule-text"><strong>QQQ CC Core:</strong> "Is this strike safely above any realistic near-term QQQ target?" &mdash; Go wider than feels necessary.</div></div>
+    <div class="rule-box"><div class="rule-num">7</div><div class="rule-text"><strong>QQQ CC Wheel:</strong> "Am I happy selling QQQ here, AND is there a tech earnings event before expiry?" &mdash; Both must be clear.</div></div>
+    <div class="rule-box"><div class="rule-num">8</div><div class="rule-text"><strong>QQQ Sell Put (Income):</strong> "Would I be OK owning 100 QQQ at this price?" &mdash; Check earnings calendar before opening.</div></div>
+    <div class="rule-box"><div class="rule-num">9</div><div class="rule-text"><strong>QQQ Sell Put (Assignment):</strong> "Is this my Nasdaq dip target?" &mdash; 21&ndash;30 DTE, no GTC, hold to expiry. Extra caution: never open in tech earnings week.</div></div>
+    <div class="rule-box"><div class="rule-num">10</div><div class="rule-text"><strong>QQQ BPS:</strong> Same as QQQ income put. Add: "Have I checked the earnings calendar for all 6 big tech names before expiry?"</div></div>
   </div>
 
   <div class="card">

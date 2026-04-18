@@ -113,6 +113,148 @@
 
   <div class="card">
     <h2>&#9888;&#65039; Universal Rules — Apply to Every Strategy Below</h2>
+   <h2>🛡️ Risk Management Enhancements — Advanced Rules</h2>
+
+<p>These rules sit on top of the VIX filter and 2× premium stop loss. They address
+scenarios the base rules don't catch: slow bear markets, gap days, and strategy
+drawdown periods.</p>
+
+<hr>
+
+<h3>🔄 1. Roll Rules (BPS & Sell Put)</h3>
+
+<p><strong>Roll triggers</strong> — roll when <em>either</em> condition fires:</p>
+
+<ul>
+  <li>Short leg delta rises to <strong>0.30</strong> (from 0.15–0.20 at open)</li>
+  <li>Underlying price breaks below short strike intraday</li>
+</ul>
+
+<p><strong>Roll mechanics</strong>:</p>
+
+<ul>
+  <li>Roll <strong>down and out</strong>: new short leg at original delta (0.15–0.20),
+      new expiry 30–45 DTE</li>
+  <li>Must collect <strong>equal or greater net credit</strong> than the roll debit
+      — if not, accept the stop loss instead</li>
+  <li>Keep the spread width the same</li>
+</ul>
+
+<p><strong>Roll cap — critical</strong>:</p>
+
+<ul>
+  <li>Maximum <strong>2 rolls</strong> per original spread</li>
+  <li>On the 3rd trigger: <strong>close for the 2× premium stop loss</strong>,
+      don't roll again</li>
+</ul>
+
+<p>! <strong>Why the cap?</strong> Rolling indefinitely in a bear market compounds
+losses and locks up capital. Taking the stop and walking away is the discipline.</p>
+
+<hr>
+
+<h3>🚨 2. Consecutive Loss Circuit Breaker</h3>
+
+<p>Any one of these triggers a <strong>30-day pause on all new BPS and Sell Put
+positions</strong>:</p>
+
+<table>
+  <tr><th>Trigger</th><th>Details</th></tr>
+  <tr>
+    <td><strong>3 consecutive stop-outs</strong></td>
+    <td>3 trades in a row hit the 2× premium stop — regardless of time span</td>
+  </tr>
+  <tr>
+    <td><strong>Monthly drawdown</strong></td>
+    <td>Cumulative options P&amp;L in a calendar month is below −8% of options bucket</td>
+  </tr>
+  <tr>
+    <td><strong>Rapid rolls</strong></td>
+    <td>4+ roll events triggered within 14 days across all open spreads</td>
+  </tr>
+</table>
+
+<p>Existing positions can still be managed (rolled, closed, or held to expiry) — the
+pause only blocks <strong>new opens</strong>.</p>
+
+<p>! <strong>Why this rule?</strong> Consecutive losses usually mean the market regime
+has shifted faster than VIX is signaling. The 30-day pause lets the market
+stabilize before re-deploying capital.</p>
+
+<hr>
+
+<h3>📅 3. Expiry Laddering — Avoid Concentration</h3>
+
+<p><strong>Open-rate limits</strong>:</p>
+
+<ul>
+  <li>Maximum <strong>1–2 new BPS per week</strong></li>
+  <li>Target: <strong>3–5 different expiry dates</strong> across concurrent positions</li>
+  <li>Never open more than 2 contracts on the same expiry date in one week</li>
+</ul>
+
+<p><strong>Why this matters</strong>: A single overnight gap (e.g. SPY −5% on a
+Monday) simultaneously puts all positions with the same short strike into
+distress. Laddering expiry dates means only a fraction face immediate stop-loss
+pressure — the rest have time to recover or be rolled.</p>
+
+<p>! <strong>Example</strong>: Instead of opening 4 BPS all expiring May 15, open 1
+each expiring May 1, May 15, May 29, June 12. Gap events hit one at a time, not
+all four.</p>
+
+<hr>
+
+<h3>📉 4. Trend Regime Filter (SMA200)</h3>
+
+<p>VIX &gt; 35 pauses new positions, but <strong>VIX rarely spikes in slow bear
+markets</strong> (2022: VIX spent most of the year in 22–30 range while SPY fell
+−25%). This filter catches slow trend breaks that the VIX rule misses.</p>
+
+<p><strong>Rule</strong> — check daily before opening any new BPS or Sell Put:</p>
+
+<table>
+  <tr>
+    <th>SPY / QQQ vs SMA200</th>
+    <th>Action</th>
+  </tr>
+  <tr>
+    <td>Closing price <strong>above</strong> SMA200</td>
+    <td>Normal rules apply (delta 0.15–0.20)</td>
+  </tr>
+  <tr>
+    <td>Closing price <strong>below</strong> SMA200</td>
+    <td>Reduce position size by half <em>and</em> tighten strike:
+        delta <strong>0.10–0.12</strong>, OTM +3% further than VIX-adjusted
+        base</td>
+  </tr>
+  <tr>
+    <td>SPY <strong>below SMA200 AND</strong> 10-day SMA crossing below SMA50</td>
+    <td>Pause new BPS entirely until SPY reclaims SMA200 for 3 consecutive
+        closes</td>
+  </tr>
+</table>
+
+<p>! <strong>Why SMA200?</strong> It's the institutional long-term trend reference.
+Slow bear markets in 2000, 2008, and 2022 all broke SMA200 before VIX spiked
+— giving 1–3 months of warning to de-risk.</p>
+
+<hr>
+
+<h3>📋 Summary — Rule Precedence When Multiple Trigger</h3>
+
+<p>When multiple rules fire, stricter always wins:</p>
+
+<ol>
+  <li><strong>Circuit breaker active</strong> → no new positions (overrides everything)</li>
+  <li><strong>VIX &gt; 35</strong> → no new positions</li>
+  <li><strong>SPY below SMA200 + trend break</strong> → no new BPS</li>
+  <li><strong>SPY below SMA200 (still in uptrend)</strong> → reduced size + tighter strike</li>
+  <li><strong>Event blackout (Fed/CPI/earnings)</strong> → no new positions in affected window</li>
+  <li><strong>Normal regime</strong> → standard VIX-adjusted table applies</li>
+</ol>
+
+<p>For existing positions: roll rules and 2× premium stop always override holding
+preferences — discipline first, conviction second.</p>
     <div class="rule-box"><div class="rule-num">1</div><div class="rule-text"><strong>CC and BPS: Always enter at 45 DTE.</strong> You need the full runway before the 21 DTE hard-close trigger. Never sell below 30 DTE.</div></div>
     <div class="rule-box"><div class="rule-num">2</div><div class="rule-text"><strong>Sell Put DTE depends on your goal.</strong> Income-focused &rarr; 45 DTE (50% GTC + 21 DTE close apply). Assignment-focused &rarr; 21&ndash;30 DTE (no GTC, no 21 DTE close &mdash; hold to expiry). See each Sell Put tab for full detail.</div></div>
     <div class="rule-box"><div class="rule-num">3</div><div class="rule-text"><strong>GTC at 50% profit — income trades only.</strong> Set immediately on CC, BPS, and income-focused puts. Not applicable to assignment-focused puts.</div></div>
